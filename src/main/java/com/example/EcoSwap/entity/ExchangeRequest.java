@@ -42,6 +42,9 @@ public class ExchangeRequest {
     
     @Column(name = "cash_adjustment")
     private Double cashAdjustment;
+
+    @Column(name = "delivery_confirmation_level")
+    private Integer deliveryConfirmationLevel;
     
     @Column(name = "created_at")
     private LocalDateTime createdAt;
@@ -58,6 +61,7 @@ public class ExchangeRequest {
         createdAt = LocalDateTime.now();
         updatedAt = LocalDateTime.now();
         if (status == null) status = ExchangeStatus.PENDING;
+        if (deliveryConfirmationLevel == null) deliveryConfirmationLevel = 0;
     }
     
     @PreUpdate

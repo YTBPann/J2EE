@@ -117,19 +117,84 @@ public class ExchangeService {
         request.setStatus(newStatus);
         
         if (newStatus == ExchangeStatus.COMPLETED) {
-            Product offeredProduct = request.getOfferedProduct();
-            Product requestedProduct = request.getRequestedProduct();
-            
-            offeredProduct.setStatus("EXCHANGED");
-            requestedProduct.setStatus("EXCHANGED");
-            
-            productRepository.save(offeredProduct);
-            productRepository.save(requestedProduct);
+            request.setDeliveryConfirmationLevel(4);
+            markProductsAsExchanged(request);
         }
         
         return exchangeRequestRepository.save(request);
     }
     
+    @Transactional
+    public ExchangeRequest advanceExchangeWorkflow(Long requestId) {
+        ExchangeRequest request = exchangeRequestRepository.findById(requestId)
+            .orElseThrow(() -> new RuntimeException("Exchange request not found"));
+
+        if (request.getStatus() == ExchangeStatus.REJECTED
+            || request.getStatus() == ExchangeStatus.CANCELLED
+            || request.getStatus() == ExchangeStatus.COMPLETED) {
+            return request;
+        }
+
+        int currentLevel = request.getDeliveryConfirmationLevel() == null
+            ? 0 : request.getDeliveryConfirmationLevel();
+
+        if (currentLevel < 4) {
+            currentLevel++;
+            request.setDeliveryConfirmationLevel(currentLevel);
+        }
+
+        if (currentLevel > 0 && request.getStatus() != ExchangeStatus.ACCEPTED && currentLevel < 4) {
+            request.setStatus(ExchangeStatus.ACCEPTED);
+        }
+
+        if (currentLevel >= 4) {
+            request.setStatus(ExchangeStatus.COMPLETED);
+            markProductsAsExchanged(request);
+        }
+
+        return exchangeRequestRepository.save(request);
+    }
+
+    @Transactional
+    public ExchangeRequest evaluateExchangeValue(Long requestId, double tolerancePercent) {
+        ExchangeRequest request = exchangeRequestRepository.findById(requestId)
+            .orElseThrow(() -> new RuntimeException("Exchange request not found"));
+
+        double offeredPrice = request.getOfferedProduct().getPrice() == null ? 0D : request.getOfferedProduct().getPrice();
+        double requestedPrice = request.getRequestedProduct().getPrice() == null ? 0D : request.getRequestedProduct().getPrice();
+        double difference = requestedPrice - offeredPrice;
+        double maxPrice = Math.max(Math.max(offeredPrice, requestedPrice), 1D);
+        double diffPercent = Math.abs(difference) / maxPrice * 100;
+
+        if (diffPercent <= tolerancePercent) {
+            request.setCashAdjustment(0D);
+            if (request.getDeliveryConfirmationLevel() == null || request.getDeliveryConfirmationLevel() < 2) {
+                request.setDeliveryConfirmationLevel(2);
+            }
+            if (request.getStatus() == ExchangeStatus.PENDING || request.getStatus() == ExchangeStatus.NEGOTIATING) {
+                request.setStatus(ExchangeStatus.ACCEPTED);
+            }
+        } else {
+            request.setCashAdjustment(difference);
+            if (request.getDeliveryConfirmationLevel() == null || request.getDeliveryConfirmationLevel() < 1) {
+                request.setDeliveryConfirmationLevel(1);
+            }
+        }
+
+        return exchangeRequestRepository.save(request);
+    }
+
+    private void markProductsAsExchanged(ExchangeRequest request) {
+        Product offeredProduct = request.getOfferedProduct();
+        Product requestedProduct = request.getRequestedProduct();
+
+        offeredProduct.setStatus("EXCHANGED");
+        requestedProduct.setStatus("EXCHANGED");
+
+        productRepository.save(offeredProduct);
+        productRepository.save(requestedProduct);
+    }
+
     @Transactional
     public ExchangeRequest acceptRequest(Long requestId) {
         return updateStatus(requestId, ExchangeStatus.ACCEPTED);

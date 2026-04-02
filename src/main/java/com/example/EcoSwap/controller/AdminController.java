@@ -9,6 +9,7 @@ import com.example.EcoSwap.repository.ExchangeRequestRepository;
 import com.example.EcoSwap.repository.ProductRepository;
 import com.example.EcoSwap.repository.UserRepository;
 import com.example.EcoSwap.service.CategoryService;
+import com.example.EcoSwap.service.ExchangeService;
 import com.example.EcoSwap.service.ProductService;
 import com.example.EcoSwap.service.UserService;
 import org.slf4j.Logger;
@@ -42,11 +43,12 @@ public class AdminController {
     private final UserService userService;
     private final CategoryService categoryService;
     private final ProductService productService;
+    private final ExchangeService exchangeService;
 
     public AdminController(UserRepository userRepository, ProductRepository productRepository,
                           CategoryRepository categoryRepository, ExchangeRequestRepository exchangeRequestRepository,
                           UserService userService, CategoryService categoryService,
-                          ProductService productService) {
+                          ProductService productService, ExchangeService exchangeService) {
         this.userRepository = userRepository;
         this.productRepository = productRepository;
         this.categoryRepository = categoryRepository;
@@ -54,6 +56,7 @@ public class AdminController {
         this.userService = userService;
         this.categoryService = categoryService;
         this.productService = productService;
+        this.exchangeService = exchangeService;
     }
 
     // ===================== DASHBOARD =====================
@@ -301,6 +304,19 @@ public class AdminController {
         model.addAttribute("currentPage", page);
         model.addAttribute("totalExchanges", exchangeRequestRepository.count());
         return "admin/exchanges";
+    }
+
+     @PostMapping("/exchanges/{id}/advance-step")
+    public String advanceExchangeStep(@PathVariable Long id) {
+        exchangeService.advanceExchangeWorkflow(id);
+        return "redirect:/admin/exchanges?success=delivery_level_updated";
+    }
+
+    @PostMapping("/exchanges/{id}/evaluate-price")
+    public String evaluateExchangePrice(@PathVariable Long id,
+                                        @RequestParam(defaultValue = "10") double tolerancePercent) {
+        exchangeService.evaluateExchangeValue(id, tolerancePercent);
+        return "redirect:/admin/exchanges?success=price_evaluated";
     }
 
     // ===================== STATISTICS API =====================
