@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thông tin cá nhân - EcoSwap</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+    <div th:replace="~{fragments/navbar :: navbar}"></div>
+
+    <main class="container">
+        <div class="profile-container">
+            <!-- Profile Header -->
+            <div class="profile-header">
+                <div class="profile-avatar-large" th:text="${#strings.substring(user.username, 0, 1)}">U</div>
+                <div class="profile-header-info">
+                    <h1 th:text="${user.fullName != null and !user.fullName.isEmpty() ? user.fullName : user.username}">User Name</h1>
+                    <p>📧 <span th:text="${user.email}">email@example.com</span></p>
+                    <p>📱 <span th:text="${user.phone != null and !user.phone.isEmpty() ? user.phone : 'Chưa cập nhật'}">0123456789</span></p>
+                    <p>📍 <span th:text="${user.address != null and !user.address.isEmpty() ? user.address : 'Chưa cập nhật'}">Address</span></p>
+                </div>
+                <a th:href="@{/profile/edit}" class="btn btn-primary">Chỉnh sửa profile</a>
+            </div>
+
+            <div th:if="${param.success}" class="alert alert-success">
+                Cập nhật thông tin thành công!
+            </div>
+
+            <!-- Profile Content -->
+            <div class="profile-content">
+                <h2>Thông tin tài khoản</h2>
+                <div class="info-row">
+                    <span class="info-label">Tên đăng nhập:</span>
+                    <span class="info-value" th:text="${user.username}">username</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Họ và tên:</span>
+                    <span class="info-value" th:text="${user.fullName != null and !user.fullName.isEmpty() ? user.fullName : 'Chưa cập nhật'}">Full Name</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Email:</span>
+                    <span class="info-value" th:text="${user.email}">email@example.com</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Số điện thoại:</span>
+                    <span class="info-value" th:text="${user.phone != null and !user.phone.isEmpty() ? user.phone : 'Chưa cập nhật'}">0123456789</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Địa chỉ:</span>
+                    <span class="info-value" th:text="${user.address != null and !user.address.isEmpty() ? user.address : 'Chưa cập nhật'}">Address</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Ngày tham gia:</span>
+                    <span class="info-value" th:text="${user.createdAt != null ? #temporals.format(user.createdAt, 'dd/MM/yyyy') : 'N/A'}">01/01/2024</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Trạng thái:</span>
+                    <span class="info-value">
+                        <span th:if="${user.active}" class="badge badge-success">Hoạt động</span>
+                        <span th:unless="${user.active}" class="badge badge-danger">Bị khóa</span>
+                    </span>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="profile-content" style="margin-top: 2rem;">
+                <h2>Chức năng nhanh</h2>
+                <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+                    <a th:href="@{/products/create}" class="btn btn-primary">➕ Đăng sản phẩm mới</a>
+                    <a th:href="@{/exchanges}" class="btn btn-secondary">🔄 Yêu cầu trao đổi</a>
+                    <a th:href="@{/exchanges/history}" class="btn btn-secondary">📋 Lịch sử trao đổi</a>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3>Về EcoSwap</h3>
+                <p>Nền tảng mua bán và trao đổi đồ cũ uy tín, an toàn tại Việt Nam.</p>
+            </div>
+            <div class="footer-section">
+                <h3>Liên kết nhanh</h3>
+                <ul>
+                    <li><a th:href="@{/}">Trang chủ</a></li>
+                    <li><a th:href="@{/products}">Sản phẩm</a></li>
+                    <li><a th:href="@{/categories}">Danh mục</a></li>
+                </ul>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 EcoSwap. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>

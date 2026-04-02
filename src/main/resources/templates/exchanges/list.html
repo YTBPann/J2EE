@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Danh sách trao đổi - EcoSwap</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <style>
+        .exchange-container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+        .exchange-tabs { display: flex; gap: 20px; margin-bottom: 30px; border-bottom: 2px solid #eee; }
+        .exchange-tabs a { padding: 12px 24px; text-decoration: none; color: #666; font-weight: 500; border-bottom: 3px solid transparent; }
+        .exchange-tabs a.active { color: #2ecc71; border-bottom-color: #2ecc71; }
+        .exchange-card { background: #fff; border-radius: 12px; padding: 20px; margin-bottom: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.08); }
+        .exchange-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        .exchange-id { font-size: 14px; color: #999; }
+        .exchange-status { padding: 6px 14px; border-radius: 20px; font-size: 13px; font-weight: 600; }
+        .status-PENDING { background: #fff3cd; color: #856404; }
+        .status-NEGOTIATING { background: #cce5ff; color: #004085; }
+        .status-ACCEPTED { background: #d4edda; color: #155724; }
+        .status-REJECTED { background: #f8d7da; color: #721c24; }
+        .status-CANCELLED { background: #e2e3e5; color: #383d41; }
+        .status-COMPLETED { background: #d1ecf1; color: #0c5460; }
+        .exchange-products { display: flex; gap: 30px; align-items: center; margin: 20px 0; }
+        .product-item { display: flex; gap: 15px; align-items: center; flex: 1; }
+        .product-item img { width: 80px; height: 80px; object-fit: cover; border-radius: 8px; }
+        .product-info h4 { margin: 0 0 5px 0; color: #333; }
+        .product-info p { margin: 0; color: #666; font-size: 14px; }
+        .exchange-arrow { font-size: 24px; color: #2ecc71; }
+        .exchange-user { display: flex; align-items: center; gap: 10px; margin-top: 15px; }
+        .exchange-user span { color: #666; }
+        .exchange-actions { display: flex; gap: 10px; margin-top: 15px; }
+        .btn { padding: 10px 20px; border-radius: 6px; text-decoration: none; font-weight: 500; cursor: pointer; border: none; }
+        .btn-view { background: #3498db; color: white; }
+        .btn-accept { background: #27ae60; color: white; }
+        .btn-reject { background: #e74c3c; color: white; }
+        .btn-cancel { background: #6c757d; color: white; }
+        .empty-state { text-align: center; padding: 60px 20px; color: #999; }
+        .empty-state h3 { margin-bottom: 10px; color: #666; }
+    </style>
+</head>
+<body>
+    <div th:replace="~{fragments/navbar :: navbar}"></div>
+
+    <main class="exchange-container">
+        <h1>Quản lý trao đổi</h1>
+        
+        <div class="exchange-tabs">
+            <a th:href="@{/exchanges(sent=true)}" th:classappend="${!showReceivedTab} ? 'active' : ''">
+                Yêu cầu đã gửi
+            </a>
+            <a th:href="@{/exchanges(received=true)}" th:classappend="${showReceivedTab} ? 'active' : ''">
+                Yêu cầu nhận được
+                <span th:if="${pendingReceivedCount > 0}" 
+                      style="background: #e74c3c; color: white; padding: 2px 8px; border-radius: 10px; font-size: 12px; margin-left: 5px;">
+                    <span th:text="${pendingReceivedCount}"></span>
+                </span>
+            </a>
+        </div>
+
+        <div th:if="${param.success}">
+            <div style="background: #d4edda; color: #155724; padding: 12px 20px; border-radius: 6px; margin-bottom: 20px;">
+                <span th:switch="${param.success[0]}">
+                    <span th:case="'request_created'">✓ Đã gửi yêu cầu trao đổi thành công!</span>
+                    <span th:case="'accepted'">✓ Đã chấp nhận yêu cầu trao đổi!</span>
+                    <span th:case="'rejected'">✓ Đã từ chối yêu cầu trao đổi!</span>
+                    <span th:case="'completed'">✓ Đã hoàn tất trao đổi!</span>
+                    <span th:case="'cancelled'">✓ Đã hủy yêu cầu trao đổi!</span>
+                </span>
+            </div>
+        </div>
+
+        <div th:if="${param.error}">
+            <div style="background: #f8d7da; color: #721c24; padding: 12px 20px; border-radius: 6px; margin-bottom: 20px;">
+                <span th:switch="${param.error[0]}">
+                    <span th:case="'not_found'">✗ Không tìm thấy yêu cầu trao đổi!</span>
+                    <span th:case="'already_requested'">✗ Bạn đã gửi yêu cầu cho sản phẩm này!</span>
+                </span>
+            </div>
+        </div>
+
+        <!-- Yêu cầu đã gửi -->
+        <div th:if="${!showReceivedTab}">
+            <div th:if="${#lists.isEmpty(sentRequests)}" class="empty-state">
+                <h3>Bạn chưa gửi yêu cầu trao đổi nào</h3>
+                <p>Hãy tìm sản phẩm bạn muốn và gửi yêu cầu trao đổi nhé!</p>
+                <a th:href="@{/products}" class="btn btn-view" style="display: inline-block; margin-top: 15px;">Xem sản phẩm</a>
+            </div>
+            
+            <div th:each="req : ${sentRequests}" class="exchange-card">
+                <div class="exchange-header">
+                    <span class="exchange-id">#<span th:text="${req.id}"></span></span>
+                    <span class="exchange-status status-${req.status}" th:text="${req.status}"></span>
+                </div>
+                
+                <div class="exchange-products">
+                    <div class="product-item">
+                        <img th:src="${req.offeredProduct.imageUrl != null ? req.offeredProduct.imageUrl : '/images/no-image.png'}" alt="Product">
+                        <div class="product-info">
+                            <h4 th:text="${req.offeredProduct.title}"></h4>
+                            <p>Đề xuất: <span th:text="${#numbers.formatCurrency(req.offeredProduct.price)}"></span></p>
+                        </div>
+                    </div>
+                    <span class="exchange-arrow">⇄</span>
+                    <div class="product-item">
+                        <img th:src="${req.requestedProduct.imageUrl != null ? req.requestedProduct.imageUrl : '/images/no-image.png'}" alt="Product">
+                        <div class="product-info">
+                            <h4 th:text="${req.requestedProduct.title}"></h4>
+                            <p>Yêu cầu: <span th:text="${#numbers.formatCurrency(req.requestedProduct.price)}"></span></p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="exchange-user">
+                    <span>Gửi đến: <strong th:text="${req.owner.username}"></strong></span>
+                </div>
+                
+                <div class="exchange-actions">
+                    <a th:href="@{/exchange/{id}(id=${req.id})}" class="btn btn-view">Xem chi tiết</a>
+                    <!-- Nút hủy chỉ hiện cho người gửi yêu cầu khi đang ở trạng thái PENDING hoặc NEGOTIATING -->
+                    <form th:if="${req.status.name() == 'PENDING' || req.status.name() == 'NEGOTIATING'}" 
+                          th:action="@{/exchange/{id}/cancel(id=${req.id})}" method="post" style="display: inline;"
+                          onsubmit="return confirm('Bạn có chắc muốn hủy yêu cầu trao đổi này?');">
+                        <button type="submit" class="btn btn-cancel">Hủy yêu cầu</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Yêu cầu nhận được -->
+        <div th:if="${showReceivedTab}">
+            <div th:if="${#lists.isEmpty(receivedRequests)}" class="empty-state">
+                <h3>Bạn chưa nhận được yêu cầu trao đổi nào</h3>
+                <p>Khi có người gửi yêu cầu, nó sẽ hiển thị ở đây.</p>
+            </div>
+            
+            <div th:each="req : ${receivedRequests}" class="exchange-card">
+                <div class="exchange-header">
+                    <span class="exchange-id">#<span th:text="${req.id}"></span></span>
+                    <span class="exchange-status status-${req.status}" th:text="${req.status}"></span>
+                </div>
+                
+                <div class="exchange-products">
+                    <div class="product-item">
+                        <img th:src="${req.offeredProduct.imageUrl != null ? req.offeredProduct.imageUrl : '/images/no-image.png'}" alt="Product">
+                        <div class="product-info">
+                            <h4 th:text="${req.offeredProduct.title}"></h4>
+                            <p>Nhận: <span th:text="${#numbers.formatCurrency(req.offeredProduct.price)}"></span></p>
+                        </div>
+                    </div>
+                    <span class="exchange-arrow">⇄</span>
+                    <div class="product-item">
+                        <img th:src="${req.requestedProduct.imageUrl != null ? req.requestedProduct.imageUrl : '/images/no-image.png'}" alt="Product">
+                        <div class="product-info">
+                            <h4 th:text="${req.requestedProduct.title}"></h4>
+                            <p>Trả: <span th:text="${#numbers.formatCurrency(req.requestedProduct.price)}"></span></p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="exchange-user">
+                    <span>Từ: <strong th:text="${req.requester.username}"></strong></span>
+                </div>
+                
+                <div class="exchange-actions">
+                    <a th:href="@{/exchange/{id}(id=${req.id})}" class="btn btn-view">Xem chi tiết</a>
+                    <form th:if="${req.status.name() == 'PENDING' || req.status.name() == 'NEGOTIATING'}" 
+                          th:action="@{/exchange/{id}/accept(id=${req.id})}" method="post" style="display: inline;">
+                        <button type="submit" class="btn btn-accept">Chấp nhận</button>
+                    </form>
+                    <form th:if="${req.status.name() == 'PENDING' || req.status.name() == 'NEGOTIATING'}" 
+                          th:action="@{/exchange/{id}/reject(id=${req.id})}" method="post" style="display: inline;">
+                        <button type="submit" class="btn btn-reject">Từ chối</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <div class="footer-bottom">
+            <p>&copy; 2026 EcoSwap. All rights reserved.</p>
+        </div>
+    </footer>
+</body>
+</html>

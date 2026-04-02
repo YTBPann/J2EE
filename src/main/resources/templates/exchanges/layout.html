@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      th:fragment="layout (title, content)">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${title}">EcoSwap</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <style>
+        .exchange-section { padding: 20px; max-width: 1200px; margin: 0 auto; }
+        .exchange-tabs { display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 2px solid #eee; }
+        .exchange-tabs a { padding: 10px 20px; text-decoration: none; color: #666; border-bottom: 2px solid transparent; margin-bottom: -2px; }
+        .exchange-tabs a.active { color: #2ecc71; border-bottom-color: #2ecc71; }
+        .exchange-card { background: #fff; border-radius: 8px; padding: 15px; margin-bottom: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); display: flex; gap: 15px; }
+        .exchange-card img { width: 100px; height: 100px; object-fit: cover; border-radius: 5px; }
+        .exchange-info { flex: 1; }
+        .exchange-status { display: inline-block; padding: 4px 10px; border-radius: 15px; font-size: 12px; font-weight: bold; }
+        .status-PENDING { background: #fff3cd; color: #856404; }
+        .status-NEGOTIATING { background: #cce5ff; color: #004085; }
+        .status-ACCEPTED { background: #d4edda; color: #155724; }
+        .status-REJECTED { background: #f8d7da; color: #721c24; }
+        .status-CANCELLED { background: #e2e3e5; color: #383d41; }
+        .status-COMPLETED { background: #d1ecf1; color: #0c5460; }
+        .product-exchange { display: flex; gap: 10px; align-items: center; margin: 10px 0; }
+        .product-exchange span { color: #666; }
+        .exchange-actions { display: flex; gap: 10px; margin-top: 10px; }
+        .btn-exchange { padding: 8px 16px; border-radius: 5px; text-decoration: none; font-size: 14px; }
+        .btn-accept { background: #28a745; color: white; }
+        .btn-reject { background: #dc3545; color: white; }
+        .btn-view { background: #007bff; color: white; }
+    </style>
+</head>
+<body>
+    <div th:replace="~{fragments/navbar :: navbar}"></div>
+    
+    <main class="exchange-section">
+        <h1>Quản lý trao đổi</h1>
+        
+        <div class="exchange-tabs">
+            <a th:href="@{/exchanges(sent=true)}" th:classappend="${param.sent != null} ? 'active' : ''">Yêu cầu đã gửi</a>
+            <a th:href="@{/exchanges(received=true)}" th:classappend="${param.received != null} ? 'active' : ''">Yêu cầu nhận được</a>
+        </div>
+        
+        <div th:if="${param.success}">
+            <div class="alert alert-success" th:switch="${param.success[0]}">
+                <span th:case="'request_created'">Đã gửi yêu cầu trao đổi thành công!</span>
+                <span th:case="'accepted'">Đã chấp nhận yêu cầu trao đổi!</span>
+                <span th:case="'rejected'">Đã từ chối yêu cầu trao đổi!</span>
+                <span th:case="'completed'">Đã hoàn tất trao đổi!</span>
+                <span th:case="'cancelled'">Đã hủy yêu cầu trao đổi!</span>
+            </div>
+        </div>
+        
+        <div th:if="${param.error}">
+            <div class="alert alert-danger" th:switch="${param.error[0]}">
+                <span th:case="'not_found'">Không tìm thấy yêu cầu trao đổi!</span>
+                <span th:case="'already_requested'">Bạn đã gửi yêu cầu cho sản phẩm này!</span>
+            </div>
+        </div>
+        
+        <div th:replace="~{${content}}">
+        </div>
+    </main>
+    
+    <footer>
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3>Về EcoSwap</h3>
+                <p>Nền tảng mua bán và trao đổi đồ cũ uy tín.</p>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2026 EcoSwap. All rights reserved.</p>
+        </div>
+    </footer>
+</body>
+</html>

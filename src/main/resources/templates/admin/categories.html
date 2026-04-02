@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Danh mục - Admin EcoSwap</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link rel="stylesheet" th:href="@{/css/admin.css}">
+</head>
+<body>
+
+<aside class="admin-sidebar">
+    <div class="admin-sidebar-header">
+        <a th:href="@{/}" class="admin-logo"><span>♻️</span> Eco<span>Swap</span></a>
+        <span class="admin-badge">ADMIN</span>
+    </div>
+    <nav class="admin-nav">
+        <a th:href="@{/admin/dashboard}" class="admin-nav-item"><span class="nav-icon">📊</span> <span>Tổng quan</span></a>
+        <a th:href="@{/admin/users}" class="admin-nav-item"><span class="nav-icon">👥</span> <span>Người dùng</span></a>
+        <a th:href="@{/admin/categories}" class="admin-nav-item active"><span class="nav-icon">📁</span> <span>Danh mục</span></a>
+        <a th:href="@{/admin/products}" class="admin-nav-item"><span class="nav-icon">📦</span> <span>Sản phẩm</span></a>
+        <a th:href="@{/admin/exchanges}" class="admin-nav-item"><span class="nav-icon">🔄</span> <span>Trao đổi</span></a>
+    </nav>
+    <div class="admin-sidebar-footer">
+        <a th:href="@{/}" class="admin-nav-item"><span class="nav-icon">🏠</span> <span>Xem website</span></a>
+        <form th:action="@{/logout}" method="post" style="display: contents;">
+            <button type="submit" class="admin-nav-item admin-logout"><span class="nav-icon">🚪</span> <span>Đăng xuất</span></button>
+        </form>
+    </div>
+</aside>
+
+<div class="admin-main">
+    <header class="admin-topbar">
+        <h1 class="admin-page-title">Danh mục</h1>
+        <div class="admin-user">
+            <span class="user-avatar" th:text="${#strings.substring(#authentication.name, 0, 1)}">A</span>
+            <span th:text="${#authentication.name}">Admin</span>
+        </div>
+    </header>
+
+    <div th:if="${param.success}" class="alert alert-success">
+        <span th:if="${param.success[0] == 'created'}">Tạo danh mục thành công!</span>
+        <span th:if="${param.success[0] == 'updated'}">Cập nhật danh mục thành công!</span>
+        <span th:if="${param.success[0] == 'deleted'}">Xóa danh mục thành công!</span>
+    </div>
+    <div th:if="${param.error}" class="alert alert-danger">
+        <span th:if="${param.error[0] == 'has_products'}">Không thể xóa! Danh mục đang có sản phẩm.</span>
+        <span th:unless="${param.error[0] == 'has_products'}" th:text="${param.error[0]}"></span>
+    </div>
+
+    <main class="admin-content">
+        <div class="table-container">
+            <div class="table-header">
+                <span class="table-title">Danh mục sản phẩm (<span th:text="${#lists.size(categories)}">0</span>)</span>
+                <a th:href="@{/admin/categories/create}" class="btn-sm btn-view">➕ Thêm danh mục</a>
+            </div>
+
+            <div style="overflow-x: auto;">
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Tên danh mục</th>
+                            <th>Mô tả</th>
+                            <th>Số sản phẩm</th>
+                            <th>Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="cat : ${categories}">
+                            <td th:text="${cat.id}">1</td>
+                            <td style="font-weight: 600;" th:text="${cat.name}">Category Name</td>
+                            <td th:text="${cat.description != null} ? ${cat.description} : '-'">Mô tả</td>
+                            <td>
+                                <span class="badge badge-info"
+                                      th:text="${cat.products != null} ? ${#lists.size(cat.products)} : 0">0</span>
+                            </td>
+                            <td>
+                                <a th:href="@{/admin/categories/{id}/edit(id=${cat.id})}" class="btn-sm btn-edit">✏️ Sửa</a>
+                                <form th:action="@{/admin/categories/{id}/delete}" method="post" style="display: inline;"
+                                      th:if="${cat.products == null or #lists.isEmpty(cat.products)}">
+                                    <button type="submit" class="btn-sm btn-danger"
+                                            onclick="return confirm('Bạn chắc chắn muốn xóa danh mục này?')">🗑 Xóa</button>
+                                </form>
+                                <button type="button" class="btn-sm btn-danger" disabled
+                                        th:if="${cat.products != null and not #lists.isEmpty(cat.products)}"
+                                        title="Cần xóa sản phẩm trước">🗑 Xóa</button>
+                            </td>
+                        </tr>
+                        <tr th:if="${#lists.isEmpty(categories)}">
+                            <td colspan="5" style="text-align: center; padding: 2rem; color: #999;">Chưa có danh mục nào</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+</div>
+
+</body>
+</html>

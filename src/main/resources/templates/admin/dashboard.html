@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tổng quan - Admin EcoSwap</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link rel="stylesheet" th:href="@{/css/admin.css}">
+</head>
+<body>
+
+<!-- Sidebar -->
+<aside class="admin-sidebar">
+    <div class="admin-sidebar-header">
+        <a th:href="@{/}" class="admin-logo">
+            <span>♻️</span> Eco<span>Swap</span>
+        </a>
+        <span class="admin-badge">ADMIN</span>
+    </div>
+
+    <nav class="admin-nav">
+        <a th:href="@{/admin/dashboard}" class="admin-nav-item active">
+            <span class="nav-icon">📊</span> <span>Tổng quan</span>
+        </a>
+        <a th:href="@{/admin/users}" class="admin-nav-item">
+            <span class="nav-icon">👥</span> <span>Người dùng</span>
+        </a>
+        <a th:href="@{/admin/categories}" class="admin-nav-item">
+            <span class="nav-icon">📁</span> <span>Danh mục</span>
+        </a>
+        <a th:href="@{/admin/products}" class="admin-nav-item">
+            <span class="nav-icon">📦</span> <span>Sản phẩm</span>
+        </a>
+        <a th:href="@{/admin/exchanges}" class="admin-nav-item">
+            <span class="nav-icon">🔄</span> <span>Trao đổi</span>
+        </a>
+    </nav>
+
+    <div class="admin-sidebar-footer">
+        <a th:href="@{/}" class="admin-nav-item">
+            <span class="nav-icon">🏠</span> <span>Xem website</span>
+        </a>
+        <form th:action="@{/logout}" method="post" style="display: contents;">
+            <button type="submit" class="admin-nav-item admin-logout">
+                <span class="nav-icon">🚪</span> <span>Đăng xuất</span>
+            </button>
+        </form>
+    </div>
+</aside>
+
+<!-- Main -->
+<div class="admin-main">
+    <header class="admin-topbar">
+        <h1 class="admin-page-title">Tổng quan</h1>
+        <div class="admin-user">
+            <span class="user-avatar" th:text="${#strings.substring(#authentication.name, 0, 1)}">A</span>
+            <span th:text="${#authentication.name}">Admin</span>
+        </div>
+    </header>
+
+    <!-- Flash Messages -->
+    <div th:if="${param.success}" class="alert alert-success">
+        <span th:text="${param.success[0]}"></span>
+    </div>
+    <div th:if="${param.error}" class="alert alert-danger">
+        <span th:text="${param.error[0]}"></span>
+    </div>
+
+    <main class="admin-content">
+        <!-- Stats Cards -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon users">
+                    <span>👥</span>
+                </div>
+                <div class="stat-info">
+                    <h3 th:text="${totalUsers}">0</h3>
+                    <p>Người dùng</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon products">
+                    <span>📦</span>
+                </div>
+                <div class="stat-info">
+                    <h3 th:text="${totalProducts}">0</h3>
+                    <p>Sản phẩm</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon categories">
+                    <span>📁</span>
+                </div>
+                <div class="stat-info">
+                    <h3 th:text="${totalCategories}">0</h3>
+                    <p>Danh mục</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon exchanges">
+                    <span>🔄</span>
+                </div>
+                <div class="stat-info">
+                    <h3 th:text="${totalExchanges}">0</h3>
+                    <p>Yêu cầu trao đổi</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon pending">
+                    <span>⏳</span>
+                </div>
+                <div class="stat-info">
+                    <h3 th:text="${pendingExchanges}">0</h3>
+                    <p>Đang chờ duyệt</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon completed">
+                    <span>✅</span>
+                </div>
+                <div class="stat-info">
+                    <h3 th:text="${completedExchanges}">0</h3>
+                    <p>Hoàn thành</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Links -->
+        <div class="table-container" style="margin-top: 1.5rem;">
+            <div class="table-header">
+                <span class="table-title">Thao tác nhanh</span>
+            </div>
+            <div style="padding: 1.5rem; display: flex; gap: 1rem; flex-wrap: wrap;">
+                <a th:href="@{/admin/users}" class="btn-sm btn-view">👥 Quản lý người dùng</a>
+                <a th:href="@{/admin/categories}" class="btn-sm btn-edit">📁 Quản lý danh mục</a>
+                <a th:href="@{/admin/products}" class="btn-sm btn-info">📦 Quản lý sản phẩm</a>
+                <a th:href="@{/admin/exchanges}" class="btn-sm btn-warning">🔄 Quản lý trao đổi</a>
+            </div>
+        </div>
+    </main>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trao đổi - Admin EcoSwap</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link rel="stylesheet" th:href="@{/css/admin.css}">
+</head>
+<body>
+
+<aside class="admin-sidebar">
+    <div class="admin-sidebar-header">
+        <a th:href="@{/}" class="admin-logo"><span>♻️</span> Eco<span>Swap</span></a>
+        <span class="admin-badge">ADMIN</span>
+    </div>
+    <nav class="admin-nav">
+        <a th:href="@{/admin/dashboard}" class="admin-nav-item"><span class="nav-icon">📊</span> <span>Tổng quan</span></a>
+        <a th:href="@{/admin/users}" class="admin-nav-item"><span class="nav-icon">👥</span> <span>Người dùng</span></a>
+        <a th:href="@{/admin/categories}" class="admin-nav-item"><span class="nav-icon">📁</span> <span>Danh mục</span></a>
+        <a th:href="@{/admin/products}" class="admin-nav-item"><span class="nav-icon">📦</span> <span>Sản phẩm</span></a>
+        <a th:href="@{/admin/exchanges}" class="admin-nav-item active"><span class="nav-icon">🔄</span> <span>Trao đổi</span></a>
+    </nav>
+    <div class="admin-sidebar-footer">
+        <a th:href="@{/}" class="admin-nav-item"><span class="nav-icon">🏠</span> <span>Xem website</span></a>
+        <form th:action="@{/logout}" method="post" style="display: contents;">
+            <button type="submit" class="admin-nav-item admin-logout"><span class="nav-icon">🚪</span> <span>Đăng xuất</span></button>
+        </form>
+    </div>
+</aside>
+
+<div class="admin-main">
+    <header class="admin-topbar">
+        <h1 class="admin-page-title">Trao đổi</h1>
+        <div class="admin-user">
+            <span class="user-avatar" th:text="${#strings.substring(#authentication.name, 0, 1)}">A</span>
+            <span th:text="${#authentication.name}">Admin</span>
+        </div>
+    </header>
+
+    <div th:if="${param.success}" class="alert alert-success"><span th:text="${param.success[0]}"></span></div>
+    <div th:if="${param.error}" class="alert alert-danger"><span th:text="${param.error[0]}"></span></div>
+
+    <main class="admin-content">
+        <div class="table-container">
+            <div class="table-header">
+                <span class="table-title">Danh sách yêu cầu trao đổi (<span th:text="${totalExchanges}">0</span>)</span>
+            </div>
+
+            <div style="overflow-x: auto;">
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Người yêu cầu</th>
+                            <th>Người nhận</th>
+                            <th>Sản phẩm đề xuất</th>
+                            <th>Sản phẩm yêu cầu</th>
+                            <th>Trạng thái</th>
+                            <th>Ngày tạo</th>
+                            <th>Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="ex : ${exchanges}">
+                            <td th:text="${ex.id}">1</td>
+                            <td>
+                                <div class="user-cell">
+                                    <div class="user-avatar-sm" th:text="${#strings.substring(ex.requester.username, 0, 1)}">U</div>
+                                    <span th:text="${ex.requester.username}">requester</span>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="user-cell">
+                                    <div class="user-avatar-sm" th:text="${#strings.substring(ex.owner.username, 0, 1)}">U</div>
+                                    <span th:text="${ex.owner.username}">owner</span>
+                                </div>
+                            </td>
+                            <td>
+                                <div style="max-width: 150px;">
+                                    <img th:if="${ex.offeredProduct.imageUrl != null}"
+                                         th:src="${ex.offeredProduct.imageUrl}" class="product-thumb">
+                                    <div style="font-size: 0.85rem; font-weight: 500;" th:text="${ex.offeredProduct.title}">Sản phẩm A</div>
+                                </div>
+                            </td>
+                            <td>
+                                <div style="max-width: 150px;">
+                                    <img th:if="${ex.requestedProduct.imageUrl != null}"
+                                         th:src="${ex.requestedProduct.imageUrl}" class="product-thumb">
+                                    <div style="font-size: 0.85rem; font-weight: 500;" th:text="${ex.requestedProduct.title}">Sản phẩm B</div>
+                                </div>
+                            </td>
+                            <td>
+                                <span class="badge"
+                                      th:classappend="
+                                          ${ex.status.name() == 'PENDING'} ? 'badge-pending' :
+                                          (${ex.status.name() == 'NEGOTIATING'} ? 'badge-negotiating' :
+                                          (${ex.status.name() == 'ACCEPTED'} ? 'badge-accepted' :
+                                          (${ex.status.name() == 'REJECTED'} ? 'badge-rejected' :
+                                          (${ex.status.name() == 'CANCELLED'} ? 'badge-cancelled' : 'badge-completed'))))"
+                                      th:text="${ex.status.name() == 'PENDING'} ? 'Chờ duyệt' :
+                                               (${ex.status.name() == 'NEGOTIATING'} ? 'Đang đàm phán' :
+                                               (${ex.status.name() == 'ACCEPTED'} ? 'Đã chấp nhận' :
+                                               (${ex.status.name() == 'REJECTED'} ? 'Từ chối' :
+                                               (${ex.status.name() == 'CANCELLED'} ? 'Đã hủy' : 'Hoàn thành'))))">Trạng thái</span>
+                            </td>
+                            <td th:text="${#temporals.format(ex.createdAt, 'dd/MM/yyyy')}">01/01/2026</td>
+                            <td>
+                                <a th:href="@{/exchange/{id}(id=${ex.id})}" class="btn-sm btn-view" target="_blank">👁 Chi tiết</a>
+                            </td>
+                        </tr>
+                        <tr th:if="${#lists.isEmpty(exchanges)}">
+                            <td colspan="8" style="text-align: center; padding: 2rem; color: #999;">Chưa có yêu cầu trao đổi nào</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="pagination" th:if="${totalPages > 1}">
+                <th:block th:each="i : ${#numbers.sequence(0, totalPages - 1)}">
+                    <a th:href="@{/admin/exchanges(page=${i}, status=${status})}"
+                       th:classappend="${i == currentPage} ? 'current'"
+                       th:text="${i + 1}">1</a>
+                </th:block>
+            </div>
+        </div>
+    </main>
+</div>
+
+</body>
+</html>

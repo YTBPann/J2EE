@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Danh mục - EcoSwap</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+    <div th:replace="~{fragments/navbar :: navbar}"></div>
+    
+    <main class="container">
+        <h2 class="section-title">Danh mục sản phẩm</h2>
+        
+        <div class="categories-grid">
+            <a th:each="category : ${categories}" 
+               th:href="@{/category/{id}(id=${category.id})}" 
+               class="category-card">
+                <h3 th:text="${category.name}">Category Name</h3>
+                <p th:text="${category.description}">Description</p>
+            </a>
+        </div>
+    </main>
+    
+    <footer>
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3>Về EcoSwap</h3>
+                <p>Nền tảng mua bán và trao đổi đồ cũ uy tín, an toàn tại Việt Nam.</p>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2026 EcoSwap. All rights reserved.</p>
+        </div>
+    </footer>
+</body>
+</html>

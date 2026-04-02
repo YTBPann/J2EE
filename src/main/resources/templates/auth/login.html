@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đăng nhập - EcoSwap</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+    <div th:replace="~{fragments/navbar :: navbar}"></div>
+    
+    <main class="container">
+        <div class="auth-form">
+            <h2>Đăng nhập</h2>
+            
+            <div th:if="${param.error}" class="alert alert-danger">
+                Tên đăng nhập hoặc mật khẩu không đúng.
+            </div>
+            
+            <div th:if="${param.registered}" class="alert alert-success">
+                Đăng ký thành công! Vui lòng đăng nhập.
+            </div>
+            
+            <div th:if="${param.logout}" class="alert alert-success">
+                Đăng xuất thành công!
+            </div>
+            
+            <form th:action="@{/login}" method="post">
+                <div class="form-group">
+                    <label for="username">Tên đăng nhập</label>
+                    <input type="text" id="username" name="username" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="password">Mật khẩu</label>
+                    <input type="password" id="password" name="password" required>
+                </div>
+                
+                <button type="submit" class="btn btn-primary">Đăng nhập</button>
+            </form>
+            
+            <p>Chưa có tài khoản? <a th:href="@{/register}">Đăng ký ngay</a></p>
+        </div>
+    </main>
+    
+    <footer>
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3>Về EcoSwap</h3>
+                <p>Nền tảng mua bán và trao đổi đồ cũ uy tín, an toàn tại Việt Nam.</p>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2026 EcoSwap. All rights reserved.</p>
+        </div>
+    </footer>
+</body>
+</html>

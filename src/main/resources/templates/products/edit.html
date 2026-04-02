@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chỉnh sửa sản phẩm - EcoSwap</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <style>
+        .form-container { max-width: 700px; margin: 0 auto; padding: 20px; }
+        .section-title { margin: 0 0 25px 0; color: #333; font-size: 22px; }
+        .current-image { margin: 15px 0; }
+        .current-image img { width: 150px; height: 150px; object-fit: cover; border-radius: 10px; border: 2px solid #e0e0e0; }
+        .current-image p { font-size: 13px; color: #666; margin: 5px 0; }
+        .btn-group { display: flex; gap: 1rem; flex-wrap: wrap; }
+    </style>
+</head>
+<body>
+    <div th:replace="~{fragments/navbar :: navbar}"></div>
+
+    <main class="container">
+        <div class="form-container">
+            <h2 class="section-title">✏️ Chỉnh sửa sản phẩm</h2>
+
+            <form th:action="@{/products/{id}/edit(id=${product.id})}" th:object="${product}" method="post" enctype="multipart/form-data">
+                <input type="hidden" name="categoryId" th:value="${product.category != null ? product.category.id : ''}">
+
+                <div class="form-group">
+                    <label for="title">Tiêu đề *</label>
+                    <input type="text" id="title" th:field="*{title}" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="category">Danh mục *</label>
+                    <select id="category" name="categoryId" required>
+                        <option value="">Chọn danh mục</option>
+                        <option th:each="cat : ${categories}"
+                                th:value="${cat.id}"
+                                th:text="${cat.name}"
+                                th:selected="${product.category != null and product.category.id == cat.id}">Category</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="price">Giá (VNĐ) *</label>
+                    <input type="number" id="price" th:field="*{price}" required min="0">
+                </div>
+
+                <div class="form-group">
+                    <label for="condition">Tình trạng</label>
+                    <select id="condition" th:field="*{condition}">
+                        <option value="NEW">Mới</option>
+                        <option value="LIKE_NEW">Như mới</option>
+                        <option value="USED">Đã sử dụng</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="location">Địa điểm</label>
+                    <input type="text" id="location" th:field="*{location}" placeholder="Ví dụ: Hà Nội, TP. HCM...">
+                </div>
+
+                <!-- Hiển thị ảnh hiện tại -->
+                <div class="form-group">
+                    <label>Hình ảnh sản phẩm</label>
+                    <div class="current-image" th:if="${product.imageUrl != null}">
+                        <img th:src="${product.imageUrl}" alt="Current Image">
+                        <p>Ảnh hiện tại</p>
+                        <label style="display: inline-flex; align-items: center; gap: 5px; cursor: pointer; font-size: 13px; color: #e74c3c;">
+                            <input type="checkbox" name="removeImage" value="true" style="width: auto;">
+                            🗑 Xóa ảnh hiện tại
+                        </label>
+                    </div>
+                    <input type="file" id="imageFile" name="imageFile" accept="image/*">
+                    <p style="font-size: 12px; color: #999; margin-top: 5px;">Để trống nếu muốn giữ ảnh hiện tại. Kích thước tối đa: 10MB.</p>
+                </div>
+
+                <div class="form-group">
+                    <label for="description">Mô tả sản phẩm</label>
+                    <textarea id="description" th:field="*{description}" rows="5" placeholder="Mô tả chi tiết về sản phẩm..."></textarea>
+                </div>
+
+                <div class="btn-group">
+                    <button type="submit" class="btn btn-primary">💾 Lưu thay đổi</button>
+                    <a th:href="@{/my-products}" class="btn btn-outline">Hủy</a>
+                </div>
+            </form>
+        </div>
+    </main>
+
+    <footer>
+        <div class="footer-bottom">
+            <p>&copy; 2026 EcoSwap. All rights reserved.</p>
+        </div>
+    </footer>
+</body>
+</html>

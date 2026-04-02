@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chi tiết sản phẩm - EcoSwap</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+    <div th:replace="~{fragments/navbar :: navbar}"></div>
+    
+    <main class="container" th:if="${product}">
+        <!-- Hiển thị thông báo lỗi -->
+        <div th:if="${param.error}" class="alert alert-danger" style="margin: 1rem 0;">
+            <span th:switch="${param.error[0]}">
+                <span th:case="'cannot_exchange_own_product'">Bạn không thể trao đổi sản phẩm của chính mình!</span>
+                <span th:case="'already_requested'">Bạn đã gửi yêu cầu trao đổi cho sản phẩm này rồi!</span>
+                <span th:case="'product_in_exchange'">⚠️ Sản phẩm này hiện đang được trao đổi bởi người khác!</span>
+                <span th:case="*">Đã xảy ra lỗi!</span>
+            </span>
+        </div>
+
+        <!-- Hiển thị thông báo thành công -->
+        <div th:if="${param.success}" class="alert alert-success" style="margin: 1rem 0;">
+            <span th:switch="${param.success[0]}">
+                <span th:case="'exchanged'">Trao đổi thành công!</span>
+                <span th:case="*">Thành công!</span>
+            </span>
+        </div>
+
+        <div class="product-detail">
+            <div class="product-detail-grid">
+                <div>
+                    <img th:src="${product.imageUrl != null ? product.imageUrl : '/images/no-image.png'}" 
+                         alt="Product Image" 
+                         class="product-detail-image">
+                </div>
+                <div class="product-detail-info">
+                    <h1 th:text="${product.title}">Product Title</h1>
+                    <div class="product-detail-price" th:text="${#numbers.formatDecimal(product.price, 0, 'COMMA', 0, 'POINT') + ' VNĐ'}">Price</div>
+                    
+                    <div class="product-detail-meta">
+                        <p><strong>Danh mục:</strong> <a th:href="@{/category/{id}(id=${product.category.id})}" th:text="${product.category.name}">Category</a></p>
+                        <p><strong>Tình trạng:</strong> 
+                            <span class="product-condition" 
+                                  th:classappend="${product.condition == 'NEW'} ? 'condition-new' : (${product.condition == 'LIKE_NEW'} ? 'condition-like-new' : 'condition-used')"
+                                  th:text="${product.condition == 'NEW'} ? 'Mới' : (${product.condition == 'LIKE_NEW'} ? 'Như mới' : 'Đã sử dụng')">Condition</span>
+                        </p>
+                        <p><strong>Địa điểm:</strong> <span th:text="${product.location}">Location</span></p>
+                        <p><strong>Ngày đăng:</strong> <span th:text="${#temporals.format(product.createdAt, 'dd/MM/yyyy')}">Date</span></p>
+                    </div>
+                    
+                    <div class="product-detail-description">
+                        <h3>Mô tả sản phẩm</h3>
+                        <p th:text="${product.description}">Description</p>
+                    </div>
+                    
+                    <div class="seller-info">
+                        <h3>Thông tin người bán</h3>
+                        <p><strong>Tên:</strong> <span th:text="${product.user.fullName}">Seller Name</span></p>
+                        <p><strong>Điện thoại:</strong> <span th:text="${product.user.phone}">Phone</span></p>
+                        <p><strong>Địa chỉ:</strong> <span th:text="${product.user.address}">Address</span></p>
+                    </div>
+                    
+                    <div style="margin-top: 1.5rem;">
+                        <a th:href="@{'tel:' + ${product.user.phone}}" class="btn btn-primary">Liên hệ ngay</a>
+                        
+                        <!-- Kiểm tra sản phẩm đang trong trao đổi -->
+                        <th:block th:if="${isInActiveExchange}">
+                            <span class="exchange-warning" style="display: inline-block; background: #fff3cd; color: #856404; padding: 10px 15px; border-radius: 6px; margin-left: 10px;">
+                                ⚠️ Sản phẩm này hiện đang được trao đổi
+                            </span>
+                        </th:block>
+                        
+                        <!-- Nút trao đổi - chỉ hiện khi không trong trao đổi -->
+                        <th:block th:unless="${isInActiveExchange}">
+                            <a th:href="@{/exchange/request/{id}(id=${product.id})}" class="btn btn-outline" style="background: #2ecc71; color: white;">Đề xuất trao đổi</a>
+                        </th:block>
+                        
+                        <a th:href="@{/}" class="btn btn-outline">Quay lại</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+    
+    <main class="container" th:unless="${product}">
+        <div class="alert alert-warning">
+            <p>Không tìm thấy sản phẩm.</p>
+            <a th:href="@{/}" class="btn btn-primary">Về trang chủ</a>
+        </div>
+    </main>
+    
+    <footer>
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3>Về EcoSwap</h3>
+                <p>Nền tảng mua bán và trao đổi đồ cũ uy tín, an toàn tại Việt Nam.</p>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2026 EcoSwap. All rights reserved.</p>
+        </div>
+    </footer>
+</body>
+</html>

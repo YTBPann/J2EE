@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${category.id != null} ? 'Sửa danh mục' : 'Thêm danh mục'">Danh mục - Admin EcoSwap</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link rel="stylesheet" th:href="@{/css/admin.css}">
+</head>
+<body>
+
+<aside class="admin-sidebar">
+    <div class="admin-sidebar-header">
+        <a th:href="@{/}" class="admin-logo"><span>♻️</span> Eco<span>Swap</span></a>
+        <span class="admin-badge">ADMIN</span>
+    </div>
+    <nav class="admin-nav">
+        <a th:href="@{/admin/dashboard}" class="admin-nav-item"><span class="nav-icon">📊</span> <span>Tổng quan</span></a>
+        <a th:href="@{/admin/users}" class="admin-nav-item"><span class="nav-icon">👥</span> <span>Người dùng</span></a>
+        <a th:href="@{/admin/categories}" class="admin-nav-item active"><span class="nav-icon">📁</span> <span>Danh mục</span></a>
+        <a th:href="@{/admin/products}" class="admin-nav-item"><span class="nav-icon">📦</span> <span>Sản phẩm</span></a>
+        <a th:href="@{/admin/exchanges}" class="admin-nav-item"><span class="nav-icon">🔄</span> <span>Trao đổi</span></a>
+    </nav>
+    <div class="admin-sidebar-footer">
+        <a th:href="@{/}" class="admin-nav-item"><span class="nav-icon">🏠</span> <span>Xem website</span></a>
+        <form th:action="@{/logout}" method="post" style="display: contents;">
+            <button type="submit" class="admin-nav-item admin-logout"><span class="nav-icon">🚪</span> <span>Đăng xuất</span></button>
+        </form>
+    </div>
+</aside>
+
+<div class="admin-main">
+    <header class="admin-topbar">
+        <h1 class="admin-page-title" th:text="${category.id != null} ? 'Sửa danh mục' : 'Thêm danh mục'">Danh mục</h1>
+        <div class="admin-user">
+            <span class="user-avatar" th:text="${#strings.substring(#authentication.name, 0, 1)}">A</span>
+            <span th:text="${#authentication.name}">Admin</span>
+        </div>
+    </header>
+
+    <main class="admin-content">
+        <div style="background: white; padding: 2rem; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); max-width: 600px;">
+
+            <form th:action="${category.id != null} ? @{/admin/categories/{id}/edit(id=${category.id})} : @{/admin/categories/create}"
+                  th:object="${category}" method="post" enctype="multipart/form-data">
+
+                <div class="form-group">
+                    <label for="name">Tên danh mục *</label>
+                    <input type="text" id="name" th:field="*{name}" required placeholder="Ví dụ: Điện tử - Công nghệ">
+                </div>
+
+                <div class="form-group">
+                    <label for="description">Mô tả</label>
+                    <textarea id="description" th:field="*{description}" rows="3"
+                              placeholder="Mô tả ngắn về danh mục..."></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="iconFile">Biểu tượng (icon)</label>
+                    <input type="file" id="iconFile" name="iconFile" accept="image/*">
+                    <small style="color: #999; margin-top: 4px; display: block;">Hỗ trợ: JPG, PNG, GIF.</small>
+                </div>
+
+                <div th:if="${category.icon != null}" class="form-group">
+                    <label>Icon hiện tại</label>
+                    <img th:src="${category.icon}" style="width: 60px; height: 60px; object-fit: cover; border-radius: 8px; border: 1px solid #ddd;">
+                    <label style="display: flex; align-items: center; gap: 6px; margin-top: 8px; font-weight: normal; cursor: pointer;">
+                        <input type="checkbox" name="removeIcon" value="true">
+                        Xóa icon hiện tại
+                    </label>
+                </div>
+
+                <div style="display: flex; gap: 1rem; margin-top: 1.5rem;">
+                    <button type="submit" class="btn btn-primary">
+                        <span th:text="${category.id != null} ? '💾 Lưu thay đổi' : '➕ Tạo danh mục'">Lưu</span>
+                    </button>
+                    <a th:href="@{/admin/categories}" class="btn btn-outline">← Quay lại</a>
+                </div>
+            </form>
+        </div>
+    </main>
+</div>
+
+</body>
+</html>

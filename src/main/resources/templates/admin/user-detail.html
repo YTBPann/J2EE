@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chi tiết người dùng - Admin EcoSwap</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link rel="stylesheet" th:href="@{/css/admin.css}">
+</head>
+<body>
+
+<aside class="admin-sidebar">
+    <div class="admin-sidebar-header">
+        <a th:href="@{/}" class="admin-logo"><span>♻️</span> Eco<span>Swap</span></a>
+        <span class="admin-badge">ADMIN</span>
+    </div>
+    <nav class="admin-nav">
+        <a th:href="@{/admin/dashboard}" class="admin-nav-item"><span class="nav-icon">📊</span> <span>Tổng quan</span></a>
+        <a th:href="@{/admin/users}" class="admin-nav-item active"><span class="nav-icon">👥</span> <span>Người dùng</span></a>
+        <a th:href="@{/admin/categories}" class="admin-nav-item"><span class="nav-icon">📁</span> <span>Danh mục</span></a>
+        <a th:href="@{/admin/products}" class="admin-nav-item"><span class="nav-icon">📦</span> <span>Sản phẩm</span></a>
+        <a th:href="@{/admin/exchanges}" class="admin-nav-item"><span class="nav-icon">🔄</span> <span>Trao đổi</span></a>
+    </nav>
+    <div class="admin-sidebar-footer">
+        <a th:href="@{/}" class="admin-nav-item"><span class="nav-icon">🏠</span> <span>Xem website</span></a>
+        <form th:action="@{/logout}" method="post" style="display: contents;">
+            <button type="submit" class="admin-nav-item admin-logout"><span class="nav-icon">🚪</span> <span>Đăng xuất</span></button>
+        </form>
+    </div>
+</aside>
+
+<div class="admin-main">
+    <header class="admin-topbar">
+        <h1 class="admin-page-title">Chi tiết người dùng</h1>
+        <div class="admin-user">
+            <span class="user-avatar" th:text="${#strings.substring(#authentication.name, 0, 1)}">A</span>
+            <span th:text="${#authentication.name}">Admin</span>
+        </div>
+    </header>
+
+    <div th:if="${param.success}" class="alert alert-success" th:with="msg=${param.success[0]}">
+        <span th:text="${msg}"></span>
+    </div>
+    <div th:if="${param.error}" class="alert alert-danger" th:with="msg=${param.error[0]}">
+        <span th:text="${msg}"></span>
+    </div>
+
+    <main class="admin-content">
+        <div style="background: white; padding: 2rem; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+            <div class="flex-between" style="margin-bottom: 1.5rem;">
+                <h2 class="section-title">Thông tin người dùng</h2>
+                <a th:href="@{/admin/users}" class="btn-sm btn-outline-sm">← Quay lại</a>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 2rem;">
+                <div>
+                    <div style="font-size: 0.85rem; color: #999; margin-bottom: 4px;">Username</div>
+                    <div style="font-weight: 600;" th:text="${user.username}">username</div>
+                </div>
+                <div>
+                    <div style="font-size: 0.85rem; color: #999; margin-bottom: 4px;">Email</div>
+                    <div th:text="${user.email}">email@example.com</div>
+                </div>
+                <div>
+                    <div style="font-size: 0.85rem; color: #999; margin-bottom: 4px;">Họ tên</div>
+                    <div th:text="${user.fullName != null} ? ${user.fullName} : '-'">Họ tên</div>
+                </div>
+                <div>
+                    <div style="font-size: 0.85rem; color: #999; margin-bottom: 4px;">Điện thoại</div>
+                    <div th:text="${user.phone != null} ? ${user.phone} : '-'">SĐT</div>
+                </div>
+                <div>
+                    <div style="font-size: 0.85rem; color: #999; margin-bottom: 4px;">Địa chỉ</div>
+                    <div th:text="${user.address != null} ? ${user.address} : '-'">Địa chỉ</div>
+                </div>
+                <div>
+                    <div style="font-size: 0.85rem; color: #999; margin-bottom: 4px;">Ngày tạo</div>
+                    <div th:text="${#temporals.format(user.createdAt, 'dd/MM/yyyy HH:mm')}">01/01/2026</div>
+                </div>
+                <div>
+                    <div style="font-size: 0.85rem; color: #999; margin-bottom: 4px;">Vai trò</div>
+                    <span class="badge" th:classappend="${'ADMIN'.equals(user.role) ? 'badge-admin' : 'badge-user'}"
+                          th:text="${'ADMIN'.equals(user.role) ? 'Admin' : 'User'}">User</span>
+                </div>
+                <div>
+                    <div style="font-size: 0.85rem; color: #999; margin-bottom: 4px;">Trạng thái</div>
+                    <span class="badge" th:classappend="${user.active} ? 'badge-active' : 'badge-inactive'"
+                          th:text="${user.active} ? 'Hoạt động' : 'Bị khóa'">Hoạt động</span>
+                </div>
+            </div>
+
+            <div style="display: flex; gap: 1rem; margin-bottom: 2rem;">
+                <form th:action="@{/admin/users/{id}/toggle-status(id=${user.id})}" method="post">
+                    <button type="submit" class="btn-sm btn-warning"
+                            th:text="${user.active} ? '🔒 Khóa tài khoản' : '🔓 Mở khóa tài khoản'">Khóa/Mở</button>
+                </form>
+                <form th:action="@{/admin/users/{id}/delete(id=${user.id})}" method="post"
+                      onsubmit="return confirm('Bạn chắc chắn muốn xóa người dùng này? Tất cả dữ liệu liên quan sẽ bị xóa.')">
+                    <button type="submit" class="btn-sm btn-danger">🗑 Xóa tài khoản</button>
+                </form>
+            </div>
+
+            <h3 class="section-title" style="border-top: 1px solid #eee; padding-top: 1.5rem; margin-top: 1rem;">
+                Sản phẩm của người dùng (<span th:text="${productCount}">0</span>)
+            </h3>
+            <div style="overflow-x: auto;">
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>Ảnh</th>
+                            <th>Tên sản phẩm</th>
+                            <th>Giá</th>
+                            <th>Danh mục</th>
+                            <th>Trạng thái</th>
+                            <th>Ngày tạo</th>
+                            <th>Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="product : ${products}">
+                            <td>
+                                <img th:if="${product.imageUrl != null}"
+                                     th:src="${product.imageUrl}" class="product-thumb">
+                                <div th:if="${product.imageUrl == null}"
+                                     style="width: 50px; height: 50px; background: #eee; border-radius: 6px; display: flex; align-items: center; justify-content: center;">📦</div>
+                            </td>
+                            <td th:text="${product.title}">Tên sản phẩm</td>
+                            <td th:text="${#numbers.formatDecimal(product.price, 0, 'POINT', 0, 'POINT')} + ' đ'">0 đ</td>
+                            <td th:text="${product.category.name}">Danh mục</td>
+                            <td>
+                                <span class="badge"
+                                      th:classappend="${'AVAILABLE'.equals(product.status) ? 'badge-available' : ('SOLD'.equals(product.status) ? 'badge-sold' : 'badge-exchanged')}"
+                                      th:text="${product.status}">Trạng thái</span>
+                            </td>
+                            <td th:text="${#temporals.format(product.createdAt, 'dd/MM/yyyy')}">01/01/2026</td>
+                            <td>
+                                <a th:href="@{/product/{id}(id=${product.id})}" class="btn-sm btn-view" target="_blank">👁 Xem</a>
+                            </td>
+                        </tr>
+                        <tr th:if="${#lists.isEmpty(products)}">
+                            <td colspan="7" style="text-align: center; padding: 1.5rem; color: #999;">Người dùng chưa có sản phẩm nào</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="pagination" th:if="${totalProductPages > 1}">
+                <th:block th:each="i : ${#numbers.sequence(0, totalProductPages - 1)}">
+                    <a th:href="@{/admin/users/{id}(id=${user.id}, page=${i})}"
+                       th:classappend="${i == currentPage} ? 'current'"
+                       th:text="${i + 1}">1</a>
+                </th:block>
+            </div>
+        </div>
+    </main>
+</div>
+
+</body>
+</html>

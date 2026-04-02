@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đăng ký - EcoSwap</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+    <div th:replace="~{fragments/navbar :: navbar}"></div>
+    
+    <main class="container">
+        <div class="auth-form">
+            <h2>Đăng ký tài khoản</h2>
+            
+            <div th:if="${error}" class="alert alert-danger" th:text="${error}">
+                Error message
+            </div>
+            
+            <form th:action="@{/register}" th:object="${user}" method="post">
+                <div class="form-group">
+                    <label for="username">Tên đăng nhập *</label>
+                    <input type="text" id="username" th:field="*{username}" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="email">Email *</label>
+                    <input type="email" id="email" th:field="*{email}" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="password">Mật khẩu *</label>
+                    <input type="password" id="password" th:field="*{password}" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="fullName">Họ và tên</label>
+                    <input type="text" id="fullName" th:field="*{fullName}">
+                </div>
+                
+                <div class="form-group">
+                    <label for="phone">Số điện thoại</label>
+                    <input type="text" id="phone" th:field="*{phone}">
+                </div>
+                
+                <div class="form-group">
+                    <label for="address">Địa chỉ</label>
+                    <input type="text" id="address" th:field="*{address}">
+                </div>
+                
+                <button type="submit" class="btn btn-primary">Đăng ký</button>
+            </form>
+            
+            <p>Đã có tài khoản? <a th:href="@{/login}">Đăng nhập ngay</a></p>
+        </div>
+    </main>
+    
+    <footer>
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3>Về EcoSwap</h3>
+                <p>Nền tảng mua bán và trao đổi đồ cũ uy tín, an toàn tại Việt Nam.</p>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2026 EcoSwap. All rights reserved.</p>
+        </div>
+    </footer>
+</body>
+</html>

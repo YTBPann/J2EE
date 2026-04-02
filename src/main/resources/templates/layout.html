@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${title != null ? title : 'EcoSwap'}">EcoSwap - Mua bán đồ cũ</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+    <div th:replace="~{fragments/navbar :: navbar}"></div>
+    
+    <main th:replace="~{${content}}">
+        <!-- Content will be inserted here -->
+    </main>
+    
+    <footer>
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3>Về EcoSwap</h3>
+                <p>Nền tảng mua bán và trao đổi đồ cũ uy tín, an toàn tại Việt Nam.</p>
+            </div>
+            <div class="footer-section">
+                <h3>Liên kết nhanh</h3>
+                <ul>
+                    <li><a th:href="@{/}">Trang chủ</a></li>
+                    <li><a th:href="@{/products}">Sản phẩm</a></li>
+                    <li><a th:href="@{/categories}">Danh mục</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h3>Hỗ trợ</h3>
+                <ul>
+                    <li><a href="#">Câu hỏi thường gặp</a></li>
+                    <li><a href="#">Chính sách bảo hành</a></li>
+                    <li><a href="#">Liên hệ hỗ trợ</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h3>Liên hệ</h3>
+                <ul>
+                    <li>Email: contact@ecoswap.com</li>
+                    <li>Hotline: 1900 xxxx</li>
+                    <li>Địa chỉ: Hà Nội, Việt Nam</li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2026 EcoSwap. All rights reserved.</p>
+        </div>
+    </footer>
+</body>
+</html>

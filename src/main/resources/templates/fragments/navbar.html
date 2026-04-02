@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<body>
+<!-- Fragment dùng chung: th:replace="~{fragments/navbar :: navbar}" -->
+<header th:fragment="navbar">
+    <nav class="navbar">
+        <a th:href="@{/}" class="logo">
+            <span>♻️</span> Eco<span>Swap</span>
+        </a>
+
+        <ul class="nav-links">
+            <li><a th:href="@{/}">Trang chủ</a></li>
+            <li><a th:href="@{/products}">Sản phẩm</a></li>
+            <li><a th:href="@{/categories}">Danh mục</a></li>
+            <li><a th:href="@{/exchanges}">
+                    Trao đổi
+                    <span th:if="${pendingExchangeCount != null and pendingExchangeCount > 0}"
+                          style="background: #e74c3c; color: white; padding: 2px 8px; border-radius: 10px; font-size: 11px; margin-left: 5px;">
+                        <span th:text="${pendingExchangeCount}"></span>
+                    </span>
+                </a>
+            </li>
+            <li sec:authorize="isAuthenticated()">
+                <a th:href="@{/exchanges/history}">📋 Lịch sử</a>
+            </li>
+            <li class="nav-dropdown" sec:authorize="isAuthenticated()">
+                <a href="#" class="nav-dropdown-toggle" onclick="return false;">
+                    Quản lý
+                    <span class="dropdown-arrow">▾</span>
+                </a>
+                <ul class="nav-dropdown-menu">
+                    <li><a th:href="@{/my-products}">Sản phẩm của tôi</a></li>
+                    <li><a th:href="@{/products/create}">Đăng sản phẩm mới</a></li>
+                    <li><a th:href="@{/exchanges}">Yêu cầu trao đổi</a></li>
+                    <li><a th:href="@{/profile}">Tài khoản</a></li>
+                    <li sec:authorize="hasRole('ADMIN')">
+                        <a th:href="@{/admin/dashboard}" style="color: var(--primary-color); font-weight: 600;">
+                            ⚙️ Quản trị
+                        </a>
+                    </li>
+                </ul>
+            </li>
+        </ul>
+
+        <div class="nav-actions">
+            <form th:action="@{/search}" method="get" class="search-form" sec:authorize="isAuthenticated()">
+                <input type="text" name="keyword" placeholder="Tìm kiếm sản phẩm..." class="search-input">
+                <button type="submit" class="btn btn-primary">Tìm</button>
+            </form>
+            <form th:action="@{/search}" method="get" class="search-form" sec:authorize="!isAuthenticated()">
+                <input type="text" name="keyword" placeholder="Tìm kiếm sản phẩm..." class="search-input">
+                <button type="submit" class="btn btn-primary">Tìm</button>
+            </form>
+
+            <div sec:authorize="!isAuthenticated()">
+                <a th:href="@{/login}" class="btn btn-outline">Đăng nhập</a>
+                <a th:href="@{/register}" class="btn btn-primary">Đăng ký</a>
+            </div>
+
+            <div sec:authorize="isAuthenticated()" class="user-menu">
+                <a th:href="@{/profile}" class="user-info">
+                    <span class="user-avatar" th:text="${#strings.substring(#authentication.name, 0, 1)}">U</span>
+                    <span class="user-name" th:text="${#authentication.name}">Username</span>
+                </a>
+                <form th:action="@{/logout}" method="post" style="display: inline;">
+                    <button type="submit" class="btn btn-outline">Đăng xuất</button>
+                </form>
+            </div>
+        </div>
+    </nav>
+</header>
+</body>
+</html>

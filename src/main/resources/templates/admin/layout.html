@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${title != null ? title : 'Admin Dashboard - EcoSwap'}">Admin Dashboard - EcoSwap</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link rel="stylesheet" th:href="@{/css/admin.css}">
+</head>
+<body>
+
+<!-- Sidebar Fragment -->
+<th:block th:fragment="sidebar">
+<aside class="admin-sidebar">
+    <div class="admin-sidebar-header">
+        <a th:href="@{/}" class="admin-logo">
+            <span>♻️</span> Eco<span>Swap</span>
+        </a>
+        <span class="admin-badge">ADMIN</span>
+    </div>
+
+    <nav class="admin-nav">
+        <a th:href="@{/admin/dashboard}" class="admin-nav-item"
+           th:classappend="${#strings.contains(#httpServletRequest.requestURI, '/admin/dashboard')} ? 'active'">
+            <span class="nav-icon">📊</span> <span>Tổng quan</span>
+        </a>
+        <a th:href="@{/admin/users}" class="admin-nav-item"
+           th:classappend="${#strings.contains(#httpServletRequest.requestURI, '/admin/users')} ? 'active'">
+            <span class="nav-icon">👥</span> <span>Người dùng</span>
+        </a>
+        <a th:href="@{/admin/categories}" class="admin-nav-item"
+           th:classappend="${#strings.contains(#httpServletRequest.requestURI, '/admin/categories')} ? 'active'">
+            <span class="nav-icon">📁</span> <span>Danh mục</span>
+        </a>
+        <a th:href="@{/admin/products}" class="admin-nav-item"
+           th:classappend="${#strings.contains(#httpServletRequest.requestURI, '/admin/products')} ? 'active'">
+            <span class="nav-icon">📦</span> <span>Sản phẩm</span>
+        </a>
+        <a th:href="@{/admin/exchanges}" class="admin-nav-item"
+           th:classappend="${#strings.contains(#httpServletRequest.requestURI, '/admin/exchanges')} ? 'active'">
+            <span class="nav-icon">🔄</span> <span>Trao đổi</span>
+        </a>
+    </nav>
+
+    <div class="admin-sidebar-footer">
+        <a th:href="@{/}" class="admin-nav-item">
+            <span class="nav-icon">🏠</span> <span>Xem website</span>
+        </a>
+        <form th:action="@{/logout}" method="post" style="display: contents;">
+            <button type="submit" class="admin-nav-item admin-logout">
+                <span class="nav-icon">🚪</span> <span>Đăng xuất</span>
+            </button>
+        </form>
+    </div>
+</aside>
+</th:block>
+
+</body>
+</html>
