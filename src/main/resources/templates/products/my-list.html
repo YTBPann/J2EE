@@ -33,6 +33,7 @@
         .btn-view { background: #6c757d; color: white; }
         .status-badge { padding: 4px 10px; border-radius: 12px; font-size: 11px; font-weight: 600; display: inline-block; }
         .status-AVAILABLE { background: #d4edda; color: #155724; }
+        .status-PENDING_APPROVAL { background: #fff3cd; color: #856404; }
         .status-EXCHANGED { background: #cce5ff; color: #004085; }
         .status-SOLD { background: #fff3cd; color: #856404; }
         .empty-state { text-align: center; padding: 60px 20px; color: #999; background: #fff; border-radius: 12px; }
@@ -63,6 +64,7 @@
             <span th:switch="${param.success[0]}">
                 <span th:case="'updated'">✓ Cập nhật sản phẩm thành công!</span>
                 <span th:case="'deleted'">✓ Xóa sản phẩm thành công!</span>
+                <span th:case="'pending_approval'">✓ Đăng sản phẩm thành công! Vui lòng chờ admin duyệt trước khi trao đổi.</span>
                 <span th:case="*">✓ Thành công!</span>
             </span>
         </div>
@@ -82,6 +84,10 @@
                 <div class="stat-label" th:text="${selectedStatus == 'ALL'} ? 'Tổng sản phẩm' : 'Kết quả lọc'">Tổng sản phẩm</div>
             </div>
             <div class="stat-item">
+                <div class="stat-number" th:text="${countPendingApproval}">0</div>
+                <div class="stat-label">Chờ duyệt</div>
+            </div>
+            <div class="stat-item">
                 <div class="stat-number" th:text="${countAvailable}">0</div>
                 <div class="stat-label">Đang rao bán</div>
             </div>
@@ -98,6 +104,7 @@
         <!-- Filter Tabs -->
         <div class="filter-tabs">
             <a th:href="@{/my-products(status='ALL')}" th:classappend="${selectedStatus == 'ALL'} ? 'active' : ''">Tất cả</a>
+            <a th:href="@{/my-products(status='PENDING_APPROVAL')}" th:classappend="${selectedStatus == 'PENDING_APPROVAL'} ? 'active' : ''">Chờ admin duyệt</a>
             <a th:href="@{/my-products(status='AVAILABLE')}" th:classappend="${selectedStatus == 'AVAILABLE'} ? 'active' : ''">Đang rao bán</a>
             <a th:href="@{/my-products(status='EXCHANGED')}" th:classappend="${selectedStatus == 'EXCHANGED'} ? 'active' : ''">Đã trao đổi</a>
             <a th:href="@{/my-products(status='SOLD')}" th:classappend="${selectedStatus == 'SOLD'} ? 'active' : ''">Đã bán</a>
@@ -117,7 +124,10 @@
 
                 <div class="product-body">
                     <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 8px;">
-                        <span class="status-badge" th:classappend="'status-' + ${product.status}" th:text="${product.status == 'AVAILABLE'} ? 'Đang rao bán' : (${product.status == 'EXCHANGED'} ? 'Đã trao đổi' : 'Đã bán')">Status</span>
+                        <span class="status-badge" th:classappend="'status-' + ${product.status}"
+                              th:text="${product.status == 'PENDING_APPROVAL'} ? 'Chờ admin duyệt' :
+                                      (product.status == 'AVAILABLE') ? 'Đang rao bán' :
+                                      (product.status == 'EXCHANGED') ? 'Đã trao đổi' : 'Đã bán'">Status</span>
                         <!-- Kiểm tra có đang trao đổi không -->
                         <span th:if="${@exchangeService.isProductInActiveExchange(product.id)}" class="exchange-warning">Đang trao đổi</span>
                     </div>

@@ -214,11 +214,7 @@
                 <span class="msg-preview" th:if="${ex.message != null and !ex.message.isEmpty()}"
                       th:text="${ex.message}">Tin nhắn...</span>
                 <a th:href="@{/exchange/{id}(id=${ex.id})}" class="btn btn-primary btn-sm">👁 Chi tiết</a>
-                <!-- Owner can accept/reject pending -->
-                <form th:if="${ex.owner.id == currentUserId && (ex.status.name() == 'PENDING' || ex.status.name() == 'NEGOTIATING')}"
-                      th:action="@{/exchange/{id}/accept(id=${ex.id})}" method="post" style="display:inline;">
-                    <button type="submit" class="btn btn-success btn-sm">✔️ Chấp nhận</button>
-                </form>
+                
                 <form th:if="${ex.owner.id == currentUserId && (ex.status.name() == 'PENDING' || ex.status.name() == 'NEGOTIATING')}"
                       th:action="@{/exchange/{id}/reject(id=${ex.id})}" method="post" style="display:inline;">
                     <button type="submit" class="btn btn-danger btn-sm">✖️ Từ chối</button>
@@ -229,11 +225,9 @@
                       onsubmit="return confirm('Hủy yêu cầu này?');">
                     <button type="submit" class="btn btn-secondary btn-sm">🚫 Hủy</button>
                 </form>
-                <!-- Both can complete when accepted -->
-                <form th:if="${ex.status.name() == 'ACCEPTED'}"
-                      th:action="@{/exchange/{id}/complete(id=${ex.id})}" method="post" style="display:inline;">
-                    <button type="submit" class="btn btn-success btn-sm">✅ Hoàn tất</button>
-                </form>
+                <span th:if="${ex.status.name() == 'ACCEPTED'}" style="font-size: 12px; color: #2e7d32; font-weight: 600;">
+                    Admin đang xử lý quy trình giao nhận
+                </span>
             </div>
         </div>
 

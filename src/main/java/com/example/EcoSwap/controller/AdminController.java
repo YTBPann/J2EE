@@ -273,10 +273,18 @@ public class AdminController {
         if (product == null) {
             return "redirect:/admin/products?error=not_found";
         }
-        String newStatus = "AVAILABLE".equals(product.getStatus()) ? "SOLD" : "AVAILABLE";
+        String current = product.getStatus();
+        String newStatus;
+        if ("PENDING_APPROVAL".equals(current)) {
+            newStatus = "AVAILABLE";
+        } else if ("AVAILABLE".equals(current)) {
+            newStatus = "PENDING_APPROVAL";
+        } else {
+            return "redirect:/admin/products?error=cannot_toggle_status";
+        }
         product.setStatus(newStatus);
         productService.updateProduct(product);
-        return "redirect:/admin/products?success=status_updated";
+        return "redirect:/admin/products?success=approval_updated";
     }
 
     // ===================== EXCHANGE MANAGEMENT =====================

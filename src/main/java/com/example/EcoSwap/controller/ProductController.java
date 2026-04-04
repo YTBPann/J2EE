@@ -45,12 +45,14 @@ public class ProductController {
 
         // Đếm theo từng trạng thái
         var allProducts = productService.getProductsByUser(currentUser.getId());
+        long countPendingApproval = allProducts.stream().filter(p -> "PENDING_APPROVAL".equals(p.getStatus())).count();
         long countAvailable = allProducts.stream().filter(p -> "AVAILABLE".equals(p.getStatus())).count();
         long countExchanged = allProducts.stream().filter(p -> "EXCHANGED".equals(p.getStatus())).count();
         long countSold = allProducts.stream().filter(p -> "SOLD".equals(p.getStatus())).count();
 
         model.addAttribute("products", products);
         model.addAttribute("selectedStatus", status);
+        model.addAttribute("countPendingApproval", countPendingApproval);
         model.addAttribute("countAvailable", countAvailable);
         model.addAttribute("countExchanged", countExchanged);
         model.addAttribute("countSold", countSold);
@@ -206,8 +208,8 @@ public class ProductController {
         
         product.setUser(currentUser);
         product.setCategory(category);
-        product.setStatus("AVAILABLE");
+        product.setStatus("PENDING_APPROVAL");
         productService.createProduct(product);
-        return "redirect:/my-products";
+        return "redirect:/my-products?success=pending_approval";
     }
 }

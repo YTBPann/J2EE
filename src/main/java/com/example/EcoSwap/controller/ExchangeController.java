@@ -126,6 +126,10 @@ public class ExchangeController {
             return "redirect:/products/" + productId + "?error=cannot_exchange_own_product";
         }
 
+        if (!"AVAILABLE".equals(requestedProduct.getStatus())) {
+            return "redirect:/products/" + productId + "?error=awaiting_admin_approval";
+        }
+
         // Check if product is already in an active exchange
         if (exchangeService.isProductInActiveExchange(productId)) {
             return "redirect:/products/" + productId + "?error=product_in_exchange";
@@ -202,11 +206,12 @@ public class ExchangeController {
         User currentUser = getCurrentUser(userDetails);
         
         Optional<ExchangeRequest> requestOpt = exchangeService.getRequestById(id);
-        if (requestOpt.isPresent() && requestOpt.get().getOwner().getId().equals(currentUser.getId())) {
+        boolean isAdmin = "ADMIN".equalsIgnoreCase(currentUser.getRole());
+        if (isAdmin && requestOpt.isPresent()) {
             exchangeService.acceptRequest(id);
         }
         
-        return "redirect:/exchange/" + id + "?success=accepted";
+        return "redirect:/exchange/" + id + (isAdmin ? "?success=accepted" : "?error=admin_only");
     }
     
     @PostMapping("/exchange/{id}/reject")
@@ -229,7 +234,11 @@ public class ExchangeController {
         
         Optional<ExchangeRequest> requestOpt = exchangeService.getRequestByIdForUser(id, currentUser.getId());
         if (requestOpt.isPresent()) {
-            exchangeService.completeRequest(id);
+            try {
+                exchangeService.completeRequest(id);
+            } catch (RuntimeException ex) {
+                return "redirect:/exchange/" + id + "?error=waiting_admin_workflow";
+            }
         }
         
         return "redirect:/exchange/" + id + "?success=completed";

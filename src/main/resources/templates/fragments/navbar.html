@@ -22,7 +22,7 @@
                 </a>
             </li>
             <li sec:authorize="isAuthenticated()">
-                <a th:href="@{/exchanges/history}">📋 Lịch sử</a>
+                <a th:href="@{/exchanges/history}">Lịch sử</a>
             </li>
             <li class="nav-dropdown" sec:authorize="isAuthenticated()">
                 <a href="#" class="nav-dropdown-toggle" onclick="return false;">
@@ -36,7 +36,7 @@
                     <li><a th:href="@{/profile}">Tài khoản</a></li>
                     <li sec:authorize="hasRole('ADMIN')">
                         <a th:href="@{/admin/dashboard}" style="color: var(--primary-color); font-weight: 600;">
-                            ⚙️ Quản trị
+                            Quản trị
                         </a>
                     </li>
                 </ul>

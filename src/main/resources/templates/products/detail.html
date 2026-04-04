@@ -13,10 +13,11 @@
     <main class="container" th:if="${product}">
         <!-- Hiển thị thông báo lỗi -->
         <div th:if="${param.error}" class="alert alert-danger" style="margin: 1rem 0;">
-            <span th:switch="${param.error[0]}">
+                <span th:switch="${param.error[0]}"></span>
                 <span th:case="'cannot_exchange_own_product'">Bạn không thể trao đổi sản phẩm của chính mình!</span>
                 <span th:case="'already_requested'">Bạn đã gửi yêu cầu trao đổi cho sản phẩm này rồi!</span>
                 <span th:case="'product_in_exchange'">⚠️ Sản phẩm này hiện đang được trao đổi bởi người khác!</span>
+                <span th:case="'awaiting_admin_approval'">Sản phẩm chưa được admin duyệt, chưa thể trao đổi.</span>
                 <span th:case="*">Đã xảy ra lỗi!</span>
             </span>
         </div>
@@ -74,10 +75,14 @@
                         </th:block>
                         
                         <!-- Nút trao đổi - chỉ hiện khi không trong trao đổi -->
-                        <th:block th:unless="${isInActiveExchange}">
+                        <th:block th:if="${!isInActiveExchange and product.status == 'AVAILABLE'}">
                             <a th:href="@{/exchange/request/{id}(id=${product.id})}" class="btn btn-outline" style="background: #2ecc71; color: white;">Đề xuất trao đổi</a>
                         </th:block>
-                        
+                        <th:block th:if="${product.status != 'AVAILABLE'}">
+                            <span class="exchange-warning" style="display: inline-block; background: #fff3cd; color: #856404; padding: 10px 15px; border-radius: 6px; margin-left: 10px;">
+                                ⏳ Sản phẩm đang chờ admin duyệt
+                            </span>
+                        </th:block>
                         <a th:href="@{/}" class="btn btn-outline">Quay lại</a>
                     </div>
                 </div>

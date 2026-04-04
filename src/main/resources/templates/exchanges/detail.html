@@ -102,10 +102,7 @@
                 </div>
                 
                 <div class="action-buttons" th:if="${exchange.status.name() == 'PENDING' || exchange.status.name() == 'NEGOTIATING'}">
-                    <!-- Chủ sản phẩm có thể chấp nhận hoặc từ chối -->
-                    <form th:if="${isOwner}" th:action="@{/exchange/{id}/accept(id=${exchange.id})}" method="post">
-                        <button type="submit" class="btn btn-accept">Chấp nhận</button>
-                    </form>
+                    <!-- Chủ sản phẩm chỉ có thể từ chối, duyệt chính thức do admin -->
                     <form th:if="${isOwner}" th:action="@{/exchange/{id}/reject(id=${exchange.id})}" method="post">
                         <button type="submit" class="btn btn-reject">Từ chối</button>
                     </form>
@@ -113,17 +110,10 @@
                     <form th:unless="${isOwner}" th:action="@{/exchange/{id}/cancel(id=${exchange.id})}" method="post">
                         <button type="submit" class="btn btn-cancel" onclick="return confirm('Bạn có chắc muốn hủy yêu cầu trao đổi này?');">Hủy yêu cầu</button>
                     </form>
-                    <!-- Cả hai có thể hủy khi đã chấp nhận -->
-                    <form th:if="${exchange.status.name() == 'ACCEPTED'}" th:action="@{/exchange/{id}/cancel(id=${exchange.id})}" method="post">
-                        <button type="submit" class="btn btn-cancel" onclick="return confirm('Bạn có chắc muốn hủy trao đổi này?');">Hủy trao đổi</button>
-                    </form>
-                    <form th:if="${exchange.status.name() == 'ACCEPTED'}" th:action="@{/exchange/{id}/complete(id=${exchange.id})}" method="post">
-                        <button type="submit" class="btn btn-complete">Hoàn tất trao đổi</button>
-                    </form>
                 </div>
                 
                 <div th:if="${exchange.status.name() == 'ACCEPTED'}" style="margin-top: 15px;">
-                    <p style="color: #27ae60; font-weight: 500; font-size: 13px;">✓ Yêu cầu đã được chấp nhận!</p>
+                    <p style="color: #27ae60; font-weight: 500; font-size: 13px;">✓ Đã được admin duyệt giá và đang xử lý theo quy trình giao hàng.</p>
                 </div>
             </div>
             
