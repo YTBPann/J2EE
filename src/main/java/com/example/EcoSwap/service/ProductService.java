@@ -30,11 +30,11 @@ public class ProductService {
     }
 
     public Page<Product> getProductsByCategory(Long categoryId, Pageable pageable) {
-        return productRepository.findByCategoryId(categoryId, pageable);
+        return productRepository.findByStatusAndCategoryId("AVAILABLE", categoryId, pageable);
     }
 
     public Page<Product> searchProducts(String keyword, Pageable pageable) {
-        return productRepository.findByTitleContainingIgnoreCase(keyword, pageable);
+        return productRepository.findByStatusAndTitleContainingIgnoreCase("AVAILABLE", keyword, pageable);
     }
 
     public Optional<Product> getProductById(Long id) {
@@ -58,6 +58,22 @@ public class ProductService {
 
     @Transactional
     public Product createProduct(Product product) {
+        return productRepository.save(product);
+    }
+
+    @Transactional
+    public Product approveProduct(Product product, Double approvedPrice) {
+        double finalApprovedPrice = approvedPrice != null
+            ? approvedPrice
+            : (product.getPrice() == null ? 0D : product.getPrice());
+
+        if (finalApprovedPrice <= 0) {
+            throw new RuntimeException("Approved price must be greater than zero");
+        }
+
+        product.setApprovedPrice(finalApprovedPrice);
+        product.setApprovedAt(java.time.LocalDateTime.now());
+        product.setStatus("AVAILABLE");
         return productRepository.save(product);
     }
 

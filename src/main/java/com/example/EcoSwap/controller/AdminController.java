@@ -1,6 +1,7 @@
 package com.example.EcoSwap.controller;
 
 import com.example.EcoSwap.entity.Category;
+import com.example.EcoSwap.entity.ExchangeRequest;
 import com.example.EcoSwap.entity.ExchangeRequest.ExchangeStatus;
 import com.example.EcoSwap.entity.Product;
 import com.example.EcoSwap.entity.User;
@@ -19,12 +20,17 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.data.domain.Sort;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
@@ -46,9 +52,9 @@ public class AdminController {
     private final ExchangeService exchangeService;
 
     public AdminController(UserRepository userRepository, ProductRepository productRepository,
-                          CategoryRepository categoryRepository, ExchangeRequestRepository exchangeRequestRepository,
-                          UserService userService, CategoryService categoryService,
-                          ProductService productService, ExchangeService exchangeService) {
+                           CategoryRepository categoryRepository, ExchangeRequestRepository exchangeRequestRepository,
+                           UserService userService, CategoryService categoryService,
+                           ProductService productService, ExchangeService exchangeService) {
         this.userRepository = userRepository;
         this.productRepository = productRepository;
         this.categoryRepository = categoryRepository;
@@ -58,8 +64,6 @@ public class AdminController {
         this.productService = productService;
         this.exchangeService = exchangeService;
     }
-
-    // ===================== DASHBOARD =====================
 
     @GetMapping("/dashboard")
     public String dashboard(Model model) {
@@ -75,27 +79,23 @@ public class AdminController {
         return "admin/dashboard";
     }
 
-    // ===================== USER MANAGEMENT =====================
-
     @GetMapping("/users")
     public String listUsers(Model model,
                             @RequestParam(defaultValue = "") String search,
                             @RequestParam(defaultValue = "0") int page,
                             @RequestParam(defaultValue = "10") int size) {
         Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
-        Page<User> userPage;
+        Page<User> userPage = userRepository.findAll(pageable);
 
         if (search != null && !search.trim().isEmpty()) {
-            userPage = userRepository.findAll(pageable);
             List<User> filtered = userPage.getContent().stream()
-                    .filter(u -> u.getUsername().toLowerCase().contains(search.toLowerCase())
-                            || (u.getEmail() != null && u.getEmail().toLowerCase().contains(search.toLowerCase()))
-                            || (u.getFullName() != null && u.getFullName().toLowerCase().contains(search.toLowerCase())))
-                    .toList();
+                .filter(u -> u.getUsername().toLowerCase().contains(search.toLowerCase())
+                    || (u.getEmail() != null && u.getEmail().toLowerCase().contains(search.toLowerCase()))
+                    || (u.getFullName() != null && u.getFullName().toLowerCase().contains(search.toLowerCase())))
+                .toList();
             model.addAttribute("users", filtered);
             model.addAttribute("totalPages", 1);
         } else {
-            userPage = userRepository.findAll(pageable);
             model.addAttribute("users", userPage.getContent());
             model.addAttribute("totalPages", userPage.getTotalPages());
         }
@@ -149,8 +149,6 @@ public class AdminController {
         return "redirect:/admin/users?success=deleted";
     }
 
-    // ===================== CATEGORY MANAGEMENT =====================
-
     @GetMapping("/categories")
     public String listCategories(Model model) {
         model.addAttribute("categories", categoryService.getAllCategories());
@@ -167,7 +165,7 @@ public class AdminController {
     public String createCategory(@ModelAttribute Category category,
                                  @RequestParam(required = false) MultipartFile iconFile,
                                  @RequestParam(required = false) String removeIcon) {
-        if (removeIcon != null && removeIcon.equals("true")) {
+        if ("true".equals(removeIcon)) {
             category.setIcon(null);
         }
         if (iconFile != null && !iconFile.isEmpty()) {
@@ -204,7 +202,7 @@ public class AdminController {
         existing.setName(category.getName());
         existing.setDescription(category.getDescription());
 
-        if (removeIcon != null && removeIcon.equals("true")) {
+        if ("true".equals(removeIcon)) {
             existing.setIcon(null);
         }
         if (iconFile != null && !iconFile.isEmpty()) {
@@ -229,20 +227,18 @@ public class AdminController {
         }
     }
 
-    // ===================== PRODUCT MANAGEMENT =====================
-
     @GetMapping("/products")
     public String listProducts(Model model,
-                              @RequestParam(defaultValue = "") String search,
-                              @RequestParam(required = false) String status,
-                              @RequestParam(defaultValue = "0") int page) {
+                               @RequestParam(defaultValue = "") String search,
+                               @RequestParam(required = false) String status,
+                               @RequestParam(defaultValue = "0") int page) {
         Pageable pageable = PageRequest.of(page, 15, Sort.by("createdAt").descending());
         Page<Product> productPage;
 
         if (search != null && !search.trim().isEmpty()) {
             productPage = productRepository.findByTitleContainingIgnoreCase(search, pageable);
             model.addAttribute("search", search);
-        } else if (status != null && !status.isEmpty() && !status.equals("ALL")) {
+        } else if (status != null && !status.isEmpty() && !"ALL".equals(status)) {
             productPage = productRepository.findByStatus(status, pageable);
             model.addAttribute("status", status);
         } else {
@@ -267,44 +263,53 @@ public class AdminController {
         }
     }
 
-    @PostMapping("/products/{id}/toggle-status")
-    public String toggleProductStatus(@PathVariable Long id) {
+    @PostMapping("/products/{id}/approve")
+    public String approveProduct(@PathVariable Long id,
+                                 @RequestParam(required = false) Double approvedPrice) {
         Product product = productService.getProductById(id).orElse(null);
         if (product == null) {
             return "redirect:/admin/products?error=not_found";
         }
-        String current = product.getStatus();
-        String newStatus;
-        if ("PENDING_APPROVAL".equals(current)) {
-            newStatus = "AVAILABLE";
-        } else if ("AVAILABLE".equals(current)) {
-            newStatus = "PENDING_APPROVAL";
-        } else {
-            return "redirect:/admin/products?error=cannot_toggle_status";
+
+        try {
+            productService.approveProduct(product, approvedPrice);
+        } catch (RuntimeException ex) {
+            return "redirect:/admin/products?error=invalid_approved_price";
         }
-        product.setStatus(newStatus);
-        productService.updateProduct(product);
         return "redirect:/admin/products?success=approval_updated";
     }
 
-    // ===================== EXCHANGE MANAGEMENT =====================
+    @PostMapping("/products/{id}/hide")
+    public String hideProduct(@PathVariable Long id) {
+        Product product = productService.getProductById(id).orElse(null);
+        if (product == null) {
+            return "redirect:/admin/products?error=not_found";
+        }
+
+        if ("EXCHANGED".equals(product.getStatus()) || "SOLD".equals(product.getStatus())) {
+            return "redirect:/admin/products?error=cannot_toggle_status";
+        }
+
+        product.setStatus("PENDING_APPROVAL");
+        productService.updateProduct(product);
+        return "redirect:/admin/products?success=approval_updated";
+    }
 
     @GetMapping("/exchanges")
     public String listExchanges(Model model,
                                 @RequestParam(required = false) ExchangeStatus status,
                                 @RequestParam(defaultValue = "0") int page) {
         Pageable pageable = PageRequest.of(page, 15, Sort.by("createdAt").descending());
-        Page<com.example.EcoSwap.entity.ExchangeRequest> exchangePage;
+        Page<ExchangeRequest> exchangePage = exchangeRequestRepository.findAll(pageable);
 
         if (status != null) {
-            exchangePage = exchangeRequestRepository.findAll(pageable);
-            List<com.example.EcoSwap.entity.ExchangeRequest> filtered = exchangePage.getContent().stream()
-                    .filter(e -> e.getStatus() == status).toList();
+            List<ExchangeRequest> filtered = exchangePage.getContent().stream()
+                .filter(e -> e.getStatus() == status)
+                .toList();
             model.addAttribute("exchanges", filtered);
             model.addAttribute("totalPages", 1);
             model.addAttribute("status", status.name());
         } else {
-            exchangePage = exchangeRequestRepository.findAll(pageable);
             model.addAttribute("exchanges", exchangePage.getContent());
             model.addAttribute("totalPages", exchangePage.getTotalPages());
         }
@@ -314,10 +319,14 @@ public class AdminController {
         return "admin/exchanges";
     }
 
-     @PostMapping("/exchanges/{id}/advance-step")
+    @PostMapping("/exchanges/{id}/advance-step")
     public String advanceExchangeStep(@PathVariable Long id) {
-        exchangeService.advanceExchangeWorkflow(id);
-        return "redirect:/admin/exchanges?success=delivery_level_updated";
+        try {
+            exchangeService.advanceExchangeWorkflow(id);
+            return "redirect:/admin/exchanges?success=delivery_level_updated";
+        } catch (RuntimeException ex) {
+            return "redirect:/admin/exchanges?error=exchange_not_ready";
+        }
     }
 
     @PostMapping("/exchanges/{id}/evaluate-price")
@@ -326,8 +335,6 @@ public class AdminController {
         exchangeService.evaluateExchangeValue(id, tolerancePercent);
         return "redirect:/admin/exchanges?success=price_evaluated";
     }
-
-    // ===================== STATISTICS API =====================
 
     @GetMapping("/stats/monthly")
     @ResponseBody
@@ -340,17 +347,17 @@ public class AdminController {
         return stats;
     }
 
-    // ===================== HELPER =====================
-
     private String uploadIcon(MultipartFile file) {
-        if (file == null || file.isEmpty()) return null;
+        if (file == null || file.isEmpty()) {
+            return null;
+        }
         try {
             String originalFilename = file.getOriginalFilename();
             String extension = "";
             if (originalFilename != null && originalFilename.contains(".")) {
                 extension = originalFilename.substring(originalFilename.lastIndexOf("."));
             }
-            String newFilename = java.util.UUID.randomUUID().toString() + extension;
+            String newFilename = java.util.UUID.randomUUID() + extension;
             java.nio.file.Path path = java.nio.file.Paths.get("uploads", newFilename);
             java.nio.file.Files.copy(file.getInputStream(), path);
             return "/uploads/" + newFilename;

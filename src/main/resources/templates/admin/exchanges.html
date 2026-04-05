@@ -12,7 +12,7 @@
 
 <aside class="admin-sidebar">
     <div class="admin-sidebar-header">
-        <a th:href="@{/}" class="admin-logo"><span>♻️</span> Eco<span>Swap</span></a>
+        <a th:href="@{/}" class="admin-logo"><span>♻</span> Eco<span>Swap</span></a>
         <span class="admin-badge">ADMIN</span>
     </div>
     <nav class="admin-nav">
@@ -20,7 +20,7 @@
         <a th:href="@{/admin/users}" class="admin-nav-item"><span class="nav-icon">👥</span> <span>Người dùng</span></a>
         <a th:href="@{/admin/categories}" class="admin-nav-item"><span class="nav-icon">📁</span> <span>Danh mục</span></a>
         <a th:href="@{/admin/products}" class="admin-nav-item"><span class="nav-icon">📦</span> <span>Sản phẩm</span></a>
-        <a th:href="@{/admin/exchanges}" class="admin-nav-item active"><span class="nav-icon">🔄</span> <span>Trao đổi</span></a>
+        <a th:href="@{/admin/exchanges}" class="admin-nav-item active"><span class="nav-icon">🔁</span> <span>Trao đổi</span></a>
     </nav>
     <div class="admin-sidebar-footer">
         <a th:href="@{/}" class="admin-nav-item"><span class="nav-icon">🏠</span> <span>Xem website</span></a>
@@ -39,25 +39,36 @@
         </div>
     </header>
 
-    <div th:if="${param.success}" class="alert alert-success"><span th:text="${param.success[0]}"></span></div>
-    <div th:if="${param.error}" class="alert alert-danger"><span th:text="${param.error[0]}"></span></div>
+    <div th:if="${param.success}" class="alert alert-success">
+        <span th:switch="${param.success[0]}">
+            <span th:case="'price_evaluated'">Đã đánh giá chênh lệch giá giao dịch.</span>
+            <span th:case="'delivery_level_updated'">Đã cập nhật tiến độ giao nhận.</span>
+            <span th:case="*">Thành công.</span>
+        </span>
+    </div>
+    <div th:if="${param.error}" class="alert alert-danger">
+        <span th:switch="${param.error[0]}">
+            <span th:case="'exchange_not_ready'">Cần hoàn tất bước khớp giá trước khi đẩy giao dịch sang bước tiếp theo.</span>
+            <span th:case="*">Đã xảy ra lỗi.</span>
+        </span>
+    </div>
 
     <main class="admin-content">
         <div class="table-container">
             <div class="table-header">
-                <span class="table-title">Danh sách yêu cầu trao đổi (<span th:text="${totalExchanges}">0</span>)</span>
+                <span class="table-title">Danh sách giao dịch (<span th:text="${totalExchanges}">0</span>)</span>
             </div>
 
-            <div style="overflow-x: auto;">
+            <div style="overflow-x:auto;">
                 <table class="admin-table">
                     <thead>
                         <tr>
                             <th>ID</th>
-                            <th>Người yêu cầu</th>
-                            <th>Người nhận</th>
-                            <th>Sản phẩm đề xuất</th>
-                            <th>Sản phẩm yêu cầu</th>
-                            <th>Định giá trực tiếp (Admin)</th>
+                            <th>Bên đề xuất</th>
+                            <th>Bên sở hữu</th>
+                            <th>Vật phẩm đề xuất</th>
+                            <th>Vật phẩm muốn đổi</th>
+                            <th>Định giá admin</th>
                             <th>Trạng thái</th>
                             <th>Tiến độ</th>
                             <th>Ngày tạo</th>
@@ -80,96 +91,84 @@
                                 </div>
                             </td>
                             <td>
-                                <div style="max-width: 150px;">
-                                    <img th:if="${ex.offeredProduct.imageUrl != null}"
-                                         th:src="${ex.offeredProduct.imageUrl}" class="product-thumb">
-                                    <div style="font-size: 0.85rem; font-weight: 500;" th:text="${ex.offeredProduct.title}">Sản phẩm A</div>
+                                <div style="max-width:160px;">
+                                    <img th:if="${ex.offeredProduct.imageUrl != null}" th:src="${ex.offeredProduct.imageUrl}" class="product-thumb">
+                                    <div style="font-size:0.85rem;font-weight:600;" th:text="${ex.offeredProduct.title}">Sản phẩm A</div>
+                                    <div style="font-size:0.8rem;color:#607d8b;"
+                                         th:text="${#numbers.formatDecimal(ex.offeredProduct.effectivePrice, 0, 'COMMA', 0, 'POINT') + ' VND'}">0 VND</div>
                                 </div>
                             </td>
                             <td>
-                                <div style="max-width: 150px;">
-                                    <img th:if="${ex.requestedProduct.imageUrl != null}"
-                                         th:src="${ex.requestedProduct.imageUrl}" class="product-thumb">
-                                    <div style="font-size: 0.85rem; font-weight: 500;" th:text="${ex.requestedProduct.title}">Sản phẩm B</div>
+                                <div style="max-width:160px;">
+                                    <img th:if="${ex.requestedProduct.imageUrl != null}" th:src="${ex.requestedProduct.imageUrl}" class="product-thumb">
+                                    <div style="font-size:0.85rem;font-weight:600;" th:text="${ex.requestedProduct.title}">Sản phẩm B</div>
+                                    <div style="font-size:0.8rem;color:#607d8b;"
+                                         th:text="${#numbers.formatDecimal(ex.requestedProduct.effectivePrice, 0, 'COMMA', 0, 'POINT') + ' VND'}">0 VND</div>
                                 </div>
                             </td>
                             <td th:with="
-                                offered=${ex.offeredProduct.price},
-                                requested=${ex.requestedProduct.price},
+                                offered=${ex.offeredProduct.effectivePrice},
+                                requested=${ex.requestedProduct.effectivePrice},
                                 priceDiff=${T(java.lang.Math).abs(offered - requested)},
-                                maxPrice=${T(java.lang.Math).max(T(java.lang.Math).max(offered, requested), 1)},
-                                diffPercent=${(priceDiff * 100.0) / maxPrice},
+                                largerPrice=${offered > requested ? offered : requested},
+                                safeBasePrice=${largerPrice > 1 ? largerPrice : 1.0},
+                                diffPercent=${(priceDiff * 100.0) / safeBasePrice},
                                 isEquivalent=${diffPercent <= 10}">
-                                <div style="font-size: 0.85rem; line-height: 1.4;">
-                                    <div>
-                                        Đề xuất:
-                                        <strong th:text="${#numbers.formatDecimal(offered, 0, 'COMMA', 0, 'POINT')} + 'đ'">0đ</strong>
+                                <div style="font-size:0.85rem;line-height:1.45;min-width:220px;">
+                                    <div>Đề xuất: <strong th:text="${#numbers.formatDecimal(offered, 0, 'COMMA', 0, 'POINT') + ' VND'}">0</strong></div>
+                                    <div>Yêu cầu: <strong th:text="${#numbers.formatDecimal(requested, 0, 'COMMA', 0, 'POINT') + ' VND'}">0</strong></div>
+                                    <div th:style="${isEquivalent ? 'color:#2e7d32;font-weight:600;' : 'color:#ef6c00;font-weight:600;'}"
+                                         th:text="${'Chênh lệch: ' + #numbers.formatDecimal(diffPercent, 0, 'POINT', 2, 'COMMA') + '%'}">0%</div>
+                                    <div th:if="${isEquivalent}" style="color:#2e7d32;">Nằm trong ngưỡng 10%, có thể chốt trao đổi.</div>
+                                    <div th:if="${!isEquivalent}" style="color:#ef6c00;">
+                                        Cần thương lượng bù thêm:
+                                        <strong th:text="${#numbers.formatDecimal(ex.cashAdjustment != null ? ex.cashAdjustment : (requested - offered), 0, 'COMMA', 0, 'POINT') + ' VND'}">0</strong>
                                     </div>
-                                    <div>
-                                        Yêu cầu:
-                                        <strong th:text="${#numbers.formatDecimal(requested, 0, 'COMMA', 0, 'POINT')} + 'đ'">0đ</strong>
-                                    </div>
-                                    <div style="font-weight: 600;"
-                                         th:style="${isEquivalent ? 'color:#2e7d32' : 'color:#ef6c00'}"
-                                         th:text="${'Chênh lệch: ' + #numbers.formatDecimal(diffPercent, 0, 'POINT', 2, 'COMMA') + '%'}">
-                                        Chênh lệch giá
-                                    </div>
-                                    <div th:if="${isEquivalent}" style="color: #2e7d32; font-weight: 600;">Tương đương (<=10%) ✅</div>
-                                    <div th:if="${!isEquivalent && ex.cashAdjustment != null}" style="color:#ef6c00;"
-                                         th:text="${'Gợi ý bù tiền: ' + #numbers.formatDecimal(ex.cashAdjustment, 0, 'COMMA', 0, 'POINT') + 'đ'}">Gợi ý bù tiền</div>
-                                    <form th:if="${ex.status.name() != 'REJECTED' && ex.status.name() != 'CANCELLED' && ex.status.name() != 'COMPLETED'}"
-                                          th:action="@{/admin/exchanges/{id}/evaluate-price(id=${ex.id})}"
-                                          method="post" style="margin-top: 6px;">
+                                    <form th:if="${!ex.terminal}" th:action="@{/admin/exchanges/{id}/evaluate-price(id=${ex.id})}" method="post" style="margin-top:8px;">
                                         <input type="hidden" name="tolerancePercent" value="10">
-                                        <button type="submit" class="btn-sm btn-view">Duyệt tương đương 10%</button>
+                                        <button type="submit" class="btn-sm btn-view">Đánh giá ngưỡng 10%</button>
                                     </form>
                                 </div>
                             </td>
                             <td>
-                            <td>
                                 <span class="badge"
-                                      th:classappend="
-                                          ${ex.status.name() == 'PENDING'} ? 'badge-pending' :
-                                          (${ex.status.name() == 'NEGOTIATING'} ? 'badge-negotiating' :
-                                          (${ex.status.name() == 'ACCEPTED'} ? 'badge-accepted' :
-                                          (${ex.status.name() == 'REJECTED'} ? 'badge-rejected' :
-                                          (${ex.status.name() == 'CANCELLED'} ? 'badge-cancelled' : 'badge-completed'))))"
-                                      th:text="${ex.status.name() == 'PENDING'} ? 'Chờ duyệt' :
-                                               (${ex.status.name() == 'NEGOTIATING'} ? 'Đang đàm phán' :
-                                               (${ex.status.name() == 'ACCEPTED'} ? 'Đã chấp nhận' :
-                                               (${ex.status.name() == 'REJECTED'} ? 'Từ chối' :
-                                               (${ex.status.name() == 'CANCELLED'} ? 'Đã hủy' : 'Hoàn thành'))))">Trạng thái</span>
+                                      th:classappend="${ex.status.name() == 'PENDING' ? 'badge-pending' :
+                                        (ex.status.name() == 'NEGOTIATING' ? 'badge-negotiating' :
+                                        (ex.status.name() == 'ACCEPTED' ? 'badge-accepted' :
+                                        (ex.status.name() == 'REJECTED' ? 'badge-rejected' :
+                                        (ex.status.name() == 'CANCELLED' ? 'badge-cancelled' : 'badge-completed'))))}"
+                                      th:text="${ex.statusLabel}">Trạng thái</span>
                             </td>
                             <td>
-                                <div style="min-width: 180px;">
-                                    <div style="font-size: 0.85rem; font-weight: 600; margin-bottom: 4px;"
-                                         th:text="${'Mức ' + (ex.deliveryConfirmationLevel != null ? ex.deliveryConfirmationLevel : 0) + '/4'}">Mức 0/4</div>
-                                    <div style="font-size: 0.78rem; color:#607d8b; margin-bottom: 6px;"
-                                         th:text="${
-                                         (ex.deliveryConfirmationLevel == null || ex.deliveryConfirmationLevel == 0) ? 'B1: Admin duyệt' :
-                                         (ex.deliveryConfirmationLevel == 1) ? 'B2: Khớp giá trao đổi' :
-                                         (ex.deliveryConfirmationLevel == 2) ? 'B3: Admin nhận hàng từ 2 bên' :
-                                         (ex.deliveryConfirmationLevel == 3) ? 'B4: Admin gửi hàng trao đổi' :
-                                         'Hoàn thành'
-                                         }">Tiến độ</div>
-                                    <div style="height: 8px; background: #eceff1; border-radius: 4px; overflow: hidden; margin-bottom: 8px;">
-                                        <div style="height: 100%; background: #4caf50;"
-                                             th:style="${'width: ' + ((ex.deliveryConfirmationLevel != null ? ex.deliveryConfirmationLevel : 0) * 25) + '%'}"></div>
+                                <div style="min-width:240px;">
+                                    <div style="display:flex;justify-content:space-between;gap:8px;font-size:0.82rem;font-weight:600;margin-bottom:6px;">
+                                        <span th:text="${'Giai đoạn ' + ex.workflowStageIndex + '/5'}">Giai đoạn</span>
+                                        <span th:text="${ex.workflowStageLabel}">Tiến độ</span>
                                     </div>
-                                    <form th:if="${ex.status.name() != 'REJECTED' && ex.status.name() != 'CANCELLED' && ex.status.name() != 'COMPLETED'}"
-                                          th:action="@{/admin/exchanges/{id}/advance-step(id=${ex.id})}"
-                                          method="post">
-                                        <button type="submit" class="btn-sm btn-edit">Chuyển bước tiếp theo</button>
+                                    <div style="height:8px;background:#eceff1;border-radius:4px;overflow:hidden;margin-bottom:10px;">
+                                        <div style="height:100%;background:#4caf50;" th:style="${'width:' + ex.progressPercent + '%'}"></div>
+                                    </div>
+                                    <div style="font-size:0.78rem;color:#607d8b;line-height:1.4;margin-bottom:8px;">
+                                        <span th:text="${ex.isAwaitingAdminReview() ? 'Bước 1: admin kiểm tra và khớp giá.' :
+                                                         (ex.deliveryConfirmationLevel == 1 ? 'Bước 2: đã chốt giao dịch, chờ hai bên gửi hàng cho admin.' :
+                                                         (ex.deliveryConfirmationLevel == 2 ? 'Bước 3: admin đã nhận hàng, chuẩn bị gửi hàng đổi cho 2 bên.' :
+                                                         (ex.deliveryConfirmationLevel == 3 ? 'Bước 4: admin đang gửi hàng trao đổi.' : 'Giao dịch đã hoàn tất.')))}">Mô tả</span>
+                                    </div>
+                                    <form th:if="${ex.canAdvanceWorkflow()}"
+                                          th:action="@{/admin/exchanges/{id}/advance-step(id=${ex.id})}" method="post">
+                                        <button type="submit" class="btn-sm btn-edit"
+                                                th:text="${ex.deliveryConfirmationLevel == 1 ? 'Mở bước gửi hàng cho admin' :
+                                                         (ex.deliveryConfirmationLevel == 2 ? 'Xác nhận admin gửi hàng' : 'Hoàn tất giao dịch')}">Chuyển bước</button>
                                     </form>
                                 </div>
                             </td>
                             <td th:text="${#temporals.format(ex.createdAt, 'dd/MM/yyyy')}">01/01/2026</td>
                             <td>
-                                <a th:href="@{/exchange/{id}(id=${ex.id})}" class="btn-sm btn-view" target="_blank">👁 Chi tiết</a>
+                                <a th:href="@{/exchange/{id}(id=${ex.id})}" class="btn-sm btn-view" target="_blank">Chi tiết</a>
                             </td>
                         </tr>
                         <tr th:if="${#lists.isEmpty(exchanges)}">
-                            <td colspan="10" style="text-align: center; padding: 2rem; color: #999;">Chưa có yêu cầu trao đổi nào</td>
+                            <td colspan="10" style="text-align:center;padding:2rem;color:#999;">Chưa có giao dịch nào</td>
                         </tr>
                     </tbody>
                 </table>
@@ -178,7 +177,7 @@
             <div class="pagination" th:if="${totalPages > 1}">
                 <th:block th:each="i : ${#numbers.sequence(0, totalPages - 1)}">
                     <a th:href="@{/admin/exchanges(page=${i}, status=${status})}"
-                       th:classappend="${i == currentPage} ? 'current'"
+                       th:classappend="${i == currentPage ? 'current' : ''}"
                        th:text="${i + 1}">1</a>
                 </th:block>
             </div>

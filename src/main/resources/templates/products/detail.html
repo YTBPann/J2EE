@@ -9,99 +9,114 @@
 </head>
 <body>
     <div th:replace="~{fragments/navbar :: navbar}"></div>
-    
+
     <main class="container" th:if="${product}">
-        <!-- Hiển thị thông báo lỗi -->
         <div th:if="${param.error}" class="alert alert-danger" style="margin: 1rem 0;">
-                <span th:switch="${param.error[0]}"></span>
-                <span th:case="'cannot_exchange_own_product'">Bạn không thể trao đổi sản phẩm của chính mình!</span>
-                <span th:case="'already_requested'">Bạn đã gửi yêu cầu trao đổi cho sản phẩm này rồi!</span>
-                <span th:case="'product_in_exchange'">⚠️ Sản phẩm này hiện đang được trao đổi bởi người khác!</span>
-                <span th:case="'awaiting_admin_approval'">Sản phẩm chưa được admin duyệt, chưa thể trao đổi.</span>
-                <span th:case="*">Đã xảy ra lỗi!</span>
+            <span th:switch="${param.error[0]}">
+                <span th:case="'cannot_exchange_own_product'">Bạn không thể trao đổi sản phẩm của chính mình.</span>
+                <span th:case="'already_requested'">Bạn đã gửi yêu cầu trao đổi cho sản phẩm này rồi.</span>
+                <span th:case="'product_in_exchange'">Sản phẩm này đang nằm trong một giao dịch khác.</span>
+                <span th:case="'awaiting_admin_approval'">Sản phẩm này chưa được admin duyệt nên chưa thể trao đổi.</span>
+                <span th:case="'not_public'">Sản phẩm này chưa được công khai trên hệ thống.</span>
+                <span th:case="*">Đã xảy ra lỗi.</span>
             </span>
         </div>
 
-        <!-- Hiển thị thông báo thành công -->
         <div th:if="${param.success}" class="alert alert-success" style="margin: 1rem 0;">
             <span th:switch="${param.success[0]}">
-                <span th:case="'exchanged'">Trao đổi thành công!</span>
-                <span th:case="*">Thành công!</span>
+                <span th:case="'exchanged'">Trao đổi thành công.</span>
+                <span th:case="*">Thành công.</span>
             </span>
         </div>
 
         <div class="product-detail">
             <div class="product-detail-grid">
                 <div>
-                    <img th:src="${product.imageUrl != null ? product.imageUrl : '/images/no-image.png'}" 
-                         alt="Product Image" 
+                    <img th:src="${product.imageUrl != null ? product.imageUrl : '/images/no-image.png'}"
+                         alt="Product Image"
                          class="product-detail-image">
                 </div>
                 <div class="product-detail-info">
                     <h1 th:text="${product.title}">Product Title</h1>
-                    <div class="product-detail-price" th:text="${#numbers.formatDecimal(product.price, 0, 'COMMA', 0, 'POINT') + ' VNĐ'}">Price</div>
-                    
+                    <div class="product-detail-price"
+                         th:text="${#numbers.formatDecimal(product.effectivePrice, 0, 'COMMA', 0, 'POINT') + ' VND'}">Price</div>
+
+                    <div th:if="${isOwnerOrAdmin and product.approvedPrice != null}"
+                         style="background:#f8f9fa;border-radius:8px;padding:12px 14px;margin-bottom:16px;">
+                        <p style="margin:0 0 6px 0;"><strong>Giá người đăng đề xuất:</strong>
+                            <span th:text="${#numbers.formatDecimal(product.price, 0, 'COMMA', 0, 'POINT') + ' VND'}"></span>
+                        </p>
+                        <p style="margin:0;"><strong>Giá admin duyệt:</strong>
+                            <span th:text="${#numbers.formatDecimal(product.approvedPrice, 0, 'COMMA', 0, 'POINT') + ' VND'}"></span>
+                        </p>
+                    </div>
+
+                    <div th:if="${product.status == 'PENDING_APPROVAL'}"
+                         class="alert alert-warning" style="margin-bottom:16px;">
+                        Sản phẩm đang chờ admin duyệt và định giá. Trong thời gian này sản phẩm sẽ không hiện công khai để trao đổi.
+                    </div>
+
                     <div class="product-detail-meta">
                         <p><strong>Danh mục:</strong> <a th:href="@{/category/{id}(id=${product.category.id})}" th:text="${product.category.name}">Category</a></p>
-                        <p><strong>Tình trạng:</strong> 
-                            <span class="product-condition" 
-                                  th:classappend="${product.condition == 'NEW'} ? 'condition-new' : (${product.condition == 'LIKE_NEW'} ? 'condition-like-new' : 'condition-used')"
-                                  th:text="${product.condition == 'NEW'} ? 'Mới' : (${product.condition == 'LIKE_NEW'} ? 'Như mới' : 'Đã sử dụng')">Condition</span>
+                        <p><strong>Tình trạng:</strong>
+                            <span class="product-condition"
+                                  th:classappend="${product.condition == 'NEW' ? 'condition-new' : (product.condition == 'LIKE_NEW' ? 'condition-like-new' : 'condition-used')}"
+                                  th:text="${product.condition == 'NEW' ? 'Mới' : (product.condition == 'LIKE_NEW' ? 'Như mới' : 'Đã sử dụng')}">Condition</span>
                         </p>
                         <p><strong>Địa điểm:</strong> <span th:text="${product.location}">Location</span></p>
                         <p><strong>Ngày đăng:</strong> <span th:text="${#temporals.format(product.createdAt, 'dd/MM/yyyy')}">Date</span></p>
                     </div>
-                    
+
                     <div class="product-detail-description">
                         <h3>Mô tả sản phẩm</h3>
                         <p th:text="${product.description}">Description</p>
                     </div>
-                    
+
                     <div class="seller-info">
-                        <h3>Thông tin người bán</h3>
+                        <h3>Thông tin người đăng</h3>
                         <p><strong>Tên:</strong> <span th:text="${product.user.fullName}">Seller Name</span></p>
                         <p><strong>Điện thoại:</strong> <span th:text="${product.user.phone}">Phone</span></p>
                         <p><strong>Địa chỉ:</strong> <span th:text="${product.user.address}">Address</span></p>
                     </div>
-                    
+
                     <div style="margin-top: 1.5rem;">
                         <a th:href="@{'tel:' + ${product.user.phone}}" class="btn btn-primary">Liên hệ ngay</a>
-                        
-                        <!-- Kiểm tra sản phẩm đang trong trao đổi -->
+
                         <th:block th:if="${isInActiveExchange}">
-                            <span class="exchange-warning" style="display: inline-block; background: #fff3cd; color: #856404; padding: 10px 15px; border-radius: 6px; margin-left: 10px;">
-                                ⚠️ Sản phẩm này hiện đang được trao đổi
+                            <span class="exchange-warning" style="display:inline-block;background:#fff3cd;color:#856404;padding:10px 15px;border-radius:6px;margin-left:10px;">
+                                Sản phẩm này đang được xử lý trong một giao dịch.
                             </span>
                         </th:block>
-                        
-                        <!-- Nút trao đổi - chỉ hiện khi không trong trao đổi -->
+
                         <th:block th:if="${!isInActiveExchange and product.status == 'AVAILABLE'}">
-                            <a th:href="@{/exchange/request/{id}(id=${product.id})}" class="btn btn-outline" style="background: #2ecc71; color: white;">Đề xuất trao đổi</a>
+                            <a th:href="@{/exchange/request/{id}(id=${product.id})}" class="btn btn-outline" style="background:#2ecc71;color:white;">Đề xuất trao đổi</a>
                         </th:block>
+
                         <th:block th:if="${product.status != 'AVAILABLE'}">
-                            <span class="exchange-warning" style="display: inline-block; background: #fff3cd; color: #856404; padding: 10px 15px; border-radius: 6px; margin-left: 10px;">
-                                ⏳ Sản phẩm đang chờ admin duyệt
+                            <span class="exchange-warning" style="display:inline-block;background:#fff3cd;color:#856404;padding:10px 15px;border-radius:6px;margin-left:10px;">
+                                Sản phẩm đang chờ admin duyệt hoặc đã đóng giao dịch.
                             </span>
                         </th:block>
+
                         <a th:href="@{/}" class="btn btn-outline">Quay lại</a>
                     </div>
                 </div>
             </div>
         </div>
     </main>
-    
+
     <main class="container" th:unless="${product}">
         <div class="alert alert-warning">
             <p>Không tìm thấy sản phẩm.</p>
             <a th:href="@{/}" class="btn btn-primary">Về trang chủ</a>
         </div>
     </main>
-    
+
     <footer>
         <div class="footer-content">
             <div class="footer-section">
                 <h3>Về EcoSwap</h3>
-                <p>Nền tảng mua bán và trao đổi đồ cũ uy tín, an toàn tại Việt Nam.</p>
+                <p>Nền tảng trao đổi đồ cũ có kiểm duyệt giá và quy trình giao nhận qua admin.</p>
             </div>
         </div>
         <div class="footer-bottom">

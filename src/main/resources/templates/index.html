@@ -4,107 +4,68 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EcoSwap - Mua bán đồ cũ</title>
+    <title>EcoSwap - Trao đổi đồ cũ</title>
     <link rel="stylesheet" th:href="@{/css/style.css}">
 </head>
 <body>
     <div th:replace="~{fragments/navbar :: navbar}"></div>
-    
+
     <main class="container">
-        <!-- Hero Section -->
         <section class="hero">
             <h1>Chào mừng đến với EcoSwap</h1>
-            <p>Mua bán và trao đổi đồ cũ dễ dàng, an toàn và tiết kiệm</p>
+            <p>Trao đổi đồ cũ có admin duyệt giá, kiểm soát hiển thị và theo dõi tiến độ giao nhận.</p>
             <a th:href="@{/products}" class="btn btn-secondary">Xem sản phẩm</a>
-            <a th:href="@{/products/create}" class="btn btn-outline" style="color: white; border-color: white;">Đăng bán ngay</a>
+            <a th:href="@{/products/create}" class="btn btn-outline" style="color:white;border-color:white;">Đăng sản phẩm</a>
         </section>
-        
-        <!-- Categories Section -->
+
         <section>
             <h2 class="section-title">Danh mục sản phẩm</h2>
             <div class="categories-grid">
-                <a th:each="category : ${categories}" 
-                   th:href="@{/category/{id}(id=${category.id})}" 
-                   class="category-card">
+                <a th:each="category : ${categories}" th:href="@{/category/{id}(id=${category.id})}" class="category-card">
                     <h3 th:text="${category.name}">Category Name</h3>
                     <p th:text="${category.description}">Description</p>
                 </a>
             </div>
         </section>
-        
-        <!-- Products Section -->
+
         <section>
-            <h2 class="section-title">Sản phẩm mới nhất</h2>
+            <h2 class="section-title">Sản phẩm mới nhất đã được duyệt</h2>
             <div class="products-grid">
-                <a th:each="product : ${products}" 
-                   th:href="@{/product/{id}(id=${product.id})}" 
-                   class="product-card">
-                    <img th:src="${product.imageUrl != null ? product.imageUrl : '/images/no-image.png'}" 
-                         alt="Product Image" 
-                         class="product-image">
+                <a th:each="product : ${products}" th:href="@{/product/{id}(id=${product.id})}" class="product-card">
+                    <img th:src="${product.imageUrl != null ? product.imageUrl : '/images/no-image.png'}" alt="Product Image" class="product-image">
                     <div class="product-info">
                         <h3 class="product-title" th:text="${product.title}">Product Title</h3>
-                        <div class="product-price" th:text="${#numbers.formatDecimal(product.price, 0, 'COMMA', 0, 'POINT') + ' VNĐ'}">Price</div>
+                        <div class="product-price" th:text="${#numbers.formatDecimal(product.effectivePrice, 0, 'COMMA', 0, 'POINT') + ' VND'}">Price</div>
                         <div class="product-meta">
                             <span th:text="${product.category.name}">Category</span>
-                            <span class="product-condition" 
-                                  th:classappend="${product.condition == 'NEW'} ? 'condition-new' : (${product.condition == 'LIKE_NEW'} ? 'condition-like-new' : 'condition-used')"
-                                  th:text="${product.condition == 'NEW'} ? 'Mới' : (${product.condition == 'LIKE_NEW'} ? 'Như mới' : 'Đã sử dụng')">Condition</span>
+                            <span class="product-condition"
+                                  th:classappend="${product.condition == 'NEW' ? 'condition-new' : (product.condition == 'LIKE_NEW' ? 'condition-like-new' : 'condition-used')}"
+                                  th:text="${product.condition == 'NEW' ? 'Mới' : (product.condition == 'LIKE_NEW' ? 'Như mới' : 'Đã sử dụng')}">Condition</span>
                         </div>
                     </div>
                 </a>
             </div>
-            
-            <!-- No Products Message -->
-            <div th:if="${#lists.isEmpty(products)}" style="text-align: center; padding: 3rem;">
-                <p style="font-size: 1.2rem; color: #7f8c8d;">Chưa có sản phẩm nào.</p>
-                <a th:href="@{/products/create}" class="btn btn-primary" style="margin-top: 1rem;">Đăng sản phẩm đầu tiên</a>
+
+            <div th:if="${#lists.isEmpty(products)}" style="text-align:center;padding:3rem;">
+                <p style="font-size:1.2rem;color:#7f8c8d;">Chưa có sản phẩm nào đã được duyệt.</p>
+                <a th:href="@{/products/create}" class="btn btn-primary" style="margin-top:1rem;">Đăng sản phẩm đầu tiên</a>
             </div>
-            
-            <!-- Pagination -->
+
             <div th:if="${totalPages > 1}" class="pagination">
                 <a th:if="${currentPage > 0}" th:href="@{/(page=${currentPage - 1})}">Trước</a>
-                
                 <span th:each="i : ${#numbers.sequence(0, totalPages - 1)}">
-                    <a th:href="@{/(page=${i})}" 
-                       th:text="${i + 1}"
-                       th:classappend="${i == currentPage} ? 'active'">Page</a>
+                    <a th:href="@{/(page=${i})}" th:text="${i + 1}" th:classappend="${i == currentPage ? 'active' : ''}">Page</a>
                 </span>
-                
                 <a th:if="${currentPage < totalPages - 1}" th:href="@{/(page=${currentPage + 1})}">Sau</a>
             </div>
         </section>
     </main>
-    
+
     <footer>
         <div class="footer-content">
             <div class="footer-section">
                 <h3>Về EcoSwap</h3>
-                <p>Nền tảng mua bán và trao đổi đồ cũ uy tín, an toàn tại Việt Nam.</p>
-            </div>
-            <div class="footer-section">
-                <h3>Liên kết nhanh</h3>
-                <ul>
-                    <li><a th:href="@{/}">Trang chủ</a></li>
-                    <li><a th:href="@{/products}">Sản phẩm</a></li>
-                    <li><a th:href="@{/categories}">Danh mục</a></li>
-                </ul>
-            </div>
-            <div class="footer-section">
-                <h3>Hỗ trợ</h3>
-                <ul>
-                    <li><a href="#">Câu hỏi thường gặp</a></li>
-                    <li><a href="#">Chính sách bảo hành</a></li>
-                    <li><a href="#">Liên hệ hỗ trợ</a></li>
-                </ul>
-            </div>
-            <div class="footer-section">
-                <h3>Liên hệ</h3>
-                <ul>
-                    <li>Email: contact@ecoswap.com</li>
-                    <li>Hotline: 1900 xxxx</li>
-                    <li>Địa chỉ: Hà Nội, Việt Nam</li>
-                </ul>
+                <p>Nền tảng trao đổi đồ cũ có quy trình admin định giá và giám sát giao dịch.</p>
             </div>
         </div>
         <div class="footer-bottom">

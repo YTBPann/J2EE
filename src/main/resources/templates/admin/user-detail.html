@@ -64,15 +64,15 @@
                 </div>
                 <div>
                     <div style="font-size: 0.85rem; color: #999; margin-bottom: 4px;">Họ tên</div>
-                    <div th:text="${user.fullName != null} ? ${user.fullName} : '-'">Họ tên</div>
+                    <div th:text="${user.fullName != null ? user.fullName : '-'}">Họ tên</div>
                 </div>
                 <div>
                     <div style="font-size: 0.85rem; color: #999; margin-bottom: 4px;">Điện thoại</div>
-                    <div th:text="${user.phone != null} ? ${user.phone} : '-'">SĐT</div>
+                    <div th:text="${user.phone != null ? user.phone : '-'}">SĐT</div>
                 </div>
                 <div>
                     <div style="font-size: 0.85rem; color: #999; margin-bottom: 4px;">Địa chỉ</div>
-                    <div th:text="${user.address != null} ? ${user.address} : '-'">Địa chỉ</div>
+                    <div th:text="${user.address != null ? user.address : '-'}">Địa chỉ</div>
                 </div>
                 <div>
                     <div style="font-size: 0.85rem; color: #999; margin-bottom: 4px;">Ngày tạo</div>
@@ -85,15 +85,15 @@
                 </div>
                 <div>
                     <div style="font-size: 0.85rem; color: #999; margin-bottom: 4px;">Trạng thái</div>
-                    <span class="badge" th:classappend="${user.active} ? 'badge-active' : 'badge-inactive'"
-                          th:text="${user.active} ? 'Hoạt động' : 'Bị khóa'">Hoạt động</span>
+                    <span class="badge" th:classappend="${user.active ? 'badge-active' : 'badge-inactive'}"
+                          th:text="${user.active ? 'Hoạt động' : 'Bị khóa'}">Hoạt động</span>
                 </div>
             </div>
 
             <div style="display: flex; gap: 1rem; margin-bottom: 2rem;">
                 <form th:action="@{/admin/users/{id}/toggle-status(id=${user.id})}" method="post">
                     <button type="submit" class="btn-sm btn-warning"
-                            th:text="${user.active} ? '🔒 Khóa tài khoản' : '🔓 Mở khóa tài khoản'">Khóa/Mở</button>
+                            th:text="${user.active ? '🔒 Khóa tài khoản' : '🔓 Mở khóa tài khoản'}">Khóa/Mở</button>
                 </form>
                 <form th:action="@{/admin/users/{id}/delete(id=${user.id})}" method="post"
                       onsubmit="return confirm('Bạn chắc chắn muốn xóa người dùng này? Tất cả dữ liệu liên quan sẽ bị xóa.')">
@@ -148,7 +148,7 @@
             <div class="pagination" th:if="${totalProductPages > 1}">
                 <th:block th:each="i : ${#numbers.sequence(0, totalProductPages - 1)}">
                     <a th:href="@{/admin/users/{id}(id=${user.id}, page=${i})}"
-                       th:classappend="${i == currentPage} ? 'current'"
+                       th:classappend="${i == currentPage ? 'current' : ''}"
                        th:text="${i + 1}">1</a>
                 </th:block>
             </div>

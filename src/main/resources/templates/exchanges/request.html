@@ -17,57 +17,18 @@
         .product-display-info h4 { margin: 0 0 5px 0; color: #333; }
         .product-display-info p { margin: 0; color: #666; }
         .product-select { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px; margin-top: 15px; }
-        .product-option { 
-            border: 2px solid #ddd; 
-            border-radius: 10px; 
-            padding: 15px; 
-            cursor: pointer; 
-            transition: all 0.3s; 
-            position: relative;
-            background: white;
-        }
-        .product-option:hover { 
-            border-color: #2ecc71; 
-            box-shadow: 0 4px 12px rgba(46, 204, 113, 0.3);
-            transform: translateY(-2px);
-        }
-        .product-option.selected { 
-            border-color: #2ecc71; 
-            background: #e8f8f0;
-            box-shadow: 0 4px 12px rgba(46, 204, 113, 0.4);
-        }
-        .product-option input { 
-            position: absolute; 
-            opacity: 0; 
-            width: 100%; 
-            height: 100%; 
-            top: 0; 
-            left: 0; 
-            cursor: pointer; 
-        }
+        .product-option { border: 2px solid #ddd; border-radius: 10px; padding: 15px; cursor: pointer; transition: all 0.3s; position: relative; background: white; }
+        .product-option:hover { border-color: #2ecc71; box-shadow: 0 4px 12px rgba(46, 204, 113, 0.3); transform: translateY(-2px); }
+        .product-option.selected { border-color: #2ecc71; background: #e8f8f0; box-shadow: 0 4px 12px rgba(46, 204, 113, 0.4); }
+        .product-option input { position: absolute; opacity: 0; width: 100%; height: 100%; top: 0; left: 0; cursor: pointer; }
         .product-option img { width: 100%; height: 120px; object-fit: cover; border-radius: 6px; margin-bottom: 10px; }
         .product-option h4 { margin: 0 0 5px 0; font-size: 14px; color: #333; }
         .product-option p { margin: 0; font-size: 13px; color: #666; }
-        .product-option .check-icon { 
-            display: none; 
-            position: absolute; 
-            top: 10px; 
-            right: 10px; 
-            width: 24px; 
-            height: 24px; 
-            background: #2ecc71; 
-            border-radius: 50%; 
-            color: white; 
-            text-align: center; 
-            line-height: 24px; 
-            font-size: 14px;
-            z-index: 1;
-        }
+        .product-option .check-icon { display: none; position: absolute; top: 10px; right: 10px; width: 24px; height: 24px; background: #2ecc71; border-radius: 50%; color: white; text-align: center; line-height: 24px; font-size: 14px; z-index: 1; }
         .product-option.selected .check-icon { display: block; }
         .form-group { margin-bottom: 20px; }
         .form-group label { display: block; margin-bottom: 8px; font-weight: 500; color: #333; }
         .form-group textarea { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; resize: vertical; min-height: 100px; font-family: inherit; }
-        /* Không style radio trong .form-group — tránh ghi đè .product-option input */
         .form-group input:not([type="radio"]) { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; }
         .btn { padding: 14px 28px; border-radius: 8px; text-decoration: none; font-weight: 500; cursor: pointer; border: none; font-size: 16px; }
         .btn-submit { background: #2ecc71; color: white; width: 100%; transition: all 0.3s; }
@@ -76,6 +37,7 @@
         .btn-back { background: #6c757d; color: white; display: inline-block; margin-bottom: 15px; }
         .empty-products { text-align: center; padding: 30px; color: #999; }
         .empty-products a { color: #2ecc71; }
+        .price-note { font-size: 12px; color: #607d8b; margin-top: 6px; }
     </style>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
@@ -92,13 +54,10 @@
             productOptions.forEach(function(option) {
                 option.addEventListener('click', function(e) {
                     e.stopPropagation();
-
                     productOptions.forEach(function(opt) { opt.classList.remove('selected'); });
                     this.classList.add('selected');
-
                     const radio = this.querySelector('input[type="radio"]');
                     radio.checked = true;
-
                     submitBtn.disabled = false;
                     submitBtn.style.opacity = '1';
                     submitBtn.textContent = 'Gửi yêu cầu trao đổi';
@@ -122,58 +81,55 @@
     <div th:replace="~{fragments/navbar :: navbar}"></div>
 
     <main class="exchange-request-container">
-        <a th:href="@{/products/{id}(id=${requestedProduct.id})}" class="btn btn-back">← Quay lại</a>
-        
+        <a th:href="@{/products/{id}(id=${requestedProduct.id})}" class="btn btn-back">Quay lại</a>
+
         <div class="request-card">
             <h2>Gửi yêu cầu trao đổi</h2>
-            
-            <!-- Sản phẩm muốn đổi -->
+
             <div class="product-section">
                 <h3>Sản phẩm bạn muốn đổi</h3>
                 <div class="product-display">
                     <img th:src="${requestedProduct.imageUrl != null ? requestedProduct.imageUrl : '/images/no-image.png'}" alt="Product">
                     <div class="product-display-info">
                         <h4 th:text="${requestedProduct.title}"></h4>
-                        <p>Giá: <span th:text="${#numbers.formatCurrency(requestedProduct.price)}"></span></p>
+                        <p>Giá admin duyệt: <span th:text="${#numbers.formatDecimal(requestedProduct.effectivePrice, 0, 'COMMA', 0, 'POINT') + ' VND'}"></span></p>
                         <p>Chủ sản phẩm: <strong th:text="${requestedProduct.user.username}"></strong></p>
+                        <div class="price-note">Hệ thống sẽ so giá đã được admin duyệt của 2 vật phẩm khi xử lý giao dịch.</div>
                     </div>
                 </div>
             </div>
-            
+
             <form th:action="@{/exchange/request}" method="post">
                 <input type="hidden" name="ownerId" th:value="${requestedProduct.user.id}">
                 <input type="hidden" name="requestedProductId" th:value="${requestedProduct.id}">
-                
-                <!-- Sản phẩm đề xuất -->
+
                 <div class="form-group">
-                    <label>Chọn sản phẩm của bạn để trao đổi <span style="color: #e74c3c;">*</span></label>
-                    <p style="font-size: 13px; color: #666; margin-bottom: 15px;">Nhấp vào sản phẩm bạn muốn dùng để trao đổi:</p>
-                    
+                    <label>Chọn sản phẩm của bạn để trao đổi <span style="color:#e74c3c;">*</span></label>
+                    <p style="font-size:13px;color:#666;margin-bottom:15px;">Chỉ các sản phẩm đã được admin duyệt mới hiện ở đây.</p>
+
                     <div th:if="${#lists.isEmpty(myProducts)}" class="empty-products">
-                        <p>Bạn chưa có sản phẩm nào để trao đổi.</p>
-                        <p>Hãy <a th:href="@{/products/create}">đăng bán sản phẩm</a> trước nhé!</p>
+                        <p>Bạn chưa có sản phẩm đã được admin duyệt để trao đổi.</p>
+                        <p>Hãy <a th:href="@{/products/create}">đăng sản phẩm</a> và đợi admin duyệt trước nhé.</p>
                     </div>
-                    
+
                     <div class="product-select" th:unless="${#lists.isEmpty(myProducts)}">
                         <div th:each="product : ${myProducts}" class="product-option">
-                            <!-- Chỉ radio đầu tiên có required — đặt required trên mọi radio trong cùng name gây lỗi validation trình duyệt -->
                             <input type="radio" name="offeredProductId" th:value="${product.id}" th:required="${productStat.first}">
                             <span class="check-icon">✓</span>
                             <img th:src="${product.imageUrl != null ? product.imageUrl : '/images/no-image.png'}" alt="Product">
                             <h4 th:text="${product.title}"></h4>
-                            <p>Giá: <span th:text="${#numbers.formatCurrency(product.price)}"></span></p>
+                            <p>Giá admin duyệt: <span th:text="${#numbers.formatDecimal(product.effectivePrice, 0, 'COMMA', 0, 'POINT') + ' VND'}"></span></p>
                         </div>
                     </div>
                 </div>
-                
-                <!-- Tin nhắn -->
+
                 <div class="form-group">
-                    <label for="message">Tin nhắn cho người bán (tùy chọn)</label>
-                    <textarea id="message" name="message" placeholder="Xin chào! Tôi muốn trao đổi sản phẩm với bạn..."></textarea>
+                    <label for="message">Tin nhắn cho người đăng (tùy chọn)</label>
+                    <textarea id="message" name="message" placeholder="Mô tả nhanh cách bạn muốn trao đổi, tình trạng sản phẩm và cách giao nhận..."></textarea>
                 </div>
-                
+
                 <button type="submit" class="btn btn-submit" id="submitBtn" th:disabled="${#lists.isEmpty(myProducts)}">
-                    <span th:if="${#lists.isEmpty(myProducts)}">Bạn chưa có sản phẩm để trao đổi</span>
+                    <span th:if="${#lists.isEmpty(myProducts)}">Bạn chưa có sản phẩm hợp lệ để trao đổi</span>
                     <span th:unless="${#lists.isEmpty(myProducts)}">Gửi yêu cầu trao đổi</span>
                 </button>
             </form>

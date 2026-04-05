@@ -8,10 +8,9 @@
     <link rel="stylesheet" th:href="@{/css/style.css}">
     <style>
         .exchange-detail { max-width: 1200px; margin: 0 auto; padding: 20px; }
-        .detail-container { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-        
+        .detail-container { display: grid; grid-template-columns: 1.1fr 1fr; gap: 20px; }
         .detail-card { background: #fff; border-radius: 12px; padding: 25px; box-shadow: 0 2px 10px rgba(0,0,0,0.08); }
-        .detail-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; padding-bottom: 15px; border-bottom: 1px solid #eee; }
+        .detail-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px solid #eee; gap: 10px; }
         .detail-header h2 { margin: 0; font-size: 20px; }
         .exchange-status { padding: 6px 12px; border-radius: 20px; font-size: 13px; font-weight: 600; }
         .status-PENDING { background: #fff3cd; color: #856404; }
@@ -20,19 +19,15 @@
         .status-REJECTED { background: #f8d7da; color: #721c24; }
         .status-CANCELLED { background: #e2e3e5; color: #383d41; }
         .status-COMPLETED { background: #d1ecf1; color: #0c5460; }
-        
         .exchange-products-detail { display: flex; gap: 20px; justify-content: center; margin: 20px 0; }
         .product-detail { flex: 1; text-align: center; padding: 15px; background: #f8f9fa; border-radius: 10px; }
         .product-detail img { width: 120px; height: 120px; object-fit: cover; border-radius: 8px; margin-bottom: 10px; }
         .product-detail h4 { margin: 10px 0 5px; color: #333; font-size: 14px; }
-        .product-detail p { color: #666; margin: 0; font-size: 13px; }
+        .product-detail p { color: #666; margin: 0 0 4px 0; font-size: 13px; }
         .arrow-center { display: flex; align-items: center; font-size: 24px; color: #2ecc71; }
-        
         .detail-info { margin: 15px 0; }
         .detail-info p { margin: 6px 0; color: #555; font-size: 13px; }
-        .detail-info strong { color: #333; }
         .detail-message { background: #f8f9fa; padding: 12px; border-radius: 8px; margin-top: 12px; font-size: 13px; }
-        
         .action-buttons { display: flex; gap: 8px; margin-top: 15px; flex-wrap: wrap; }
         .btn { padding: 10px 18px; border-radius: 6px; text-decoration: none; font-weight: 500; cursor: pointer; border: none; font-size: 13px; }
         .btn-back { background: #6c757d; color: white; }
@@ -40,8 +35,24 @@
         .btn-reject { background: #e74c3c; color: white; }
         .btn-complete { background: #3498db; color: white; }
         .btn-cancel { background: #6c757d; color: white; }
-        
-        .chat-container { background: #fff; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.08); overflow: hidden; display: flex; flex-direction: column; height: 100%; min-height: 500px; }
+        .btn-admin { background: #5b21b6; color: white; }
+        .workflow-box { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 18px; margin-bottom: 20px; }
+        .workflow-box h3 { margin: 0 0 10px 0; font-size: 16px; color: #1e293b; }
+        .workflow-top { display:flex; justify-content:space-between; gap:8px; align-items:center; margin-bottom:10px; }
+        .workflow-bar { height: 8px; background: #e2e8f0; border-radius: 999px; overflow: hidden; margin-bottom: 14px; }
+        .workflow-fill { height: 100%; background: linear-gradient(90deg, #10b981, #22c55e); }
+        .workflow-steps { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; }
+        .workflow-step { text-align: center; font-size: 11px; color: #64748b; }
+        .workflow-step .dot { width: 28px; height: 28px; border-radius: 50%; border: 2px solid #cbd5e1; display:flex; align-items:center; justify-content:center; margin: 0 auto 8px; background: white; font-weight: 700; }
+        .workflow-step.active .dot,
+        .workflow-step.done .dot { border-color: #16a34a; background: #16a34a; color: white; }
+        .workflow-step.active { color: #166534; font-weight: 600; }
+        .workflow-step.done { color: #166534; }
+        .note-box { border-radius: 10px; padding: 12px 14px; margin: 12px 0; font-size: 13px; line-height: 1.5; }
+        .note-info { background: #eff6ff; color: #1d4ed8; }
+        .note-warn { background: #fff7ed; color: #c2410c; }
+        .note-success { background: #ecfdf5; color: #047857; }
+        .chat-container { background: #fff; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.08); overflow: hidden; display: flex; flex-direction: column; min-height: 520px; }
         .chat-header { background: #2ecc71; color: white; padding: 15px 20px; }
         .chat-header h3 { margin: 0; font-size: 16px; }
         .chat-messages { flex: 1; overflow-y: auto; padding: 20px; background: #f8f9fa; min-height: 300px; }
@@ -55,10 +66,9 @@
         .chat-input { display: flex; gap: 10px; padding: 15px; background: #fff; border-top: 1px solid #eee; }
         .chat-input input { flex: 1; padding: 10px 15px; border: 1px solid #ddd; border-radius: 25px; outline: none; }
         .chat-input button { padding: 10px 20px; background: #2ecc71; color: white; border: none; border-radius: 25px; cursor: pointer; font-weight: 500; }
-        .chat-input button:hover { background: #27ae60; }
-        
         @media (max-width: 900px) {
             .detail-container { grid-template-columns: 1fr; }
+            .workflow-steps { grid-template-columns: repeat(2, 1fr); }
         }
     </style>
 </head>
@@ -66,61 +76,136 @@
     <div th:replace="~{fragments/navbar :: navbar}"></div>
 
     <main class="exchange-detail">
-        <a th:href="@{/exchanges}" class="btn btn-back" style="display: inline-block; margin-bottom: 15px;">← Quay lại</a>
-        
+        <a th:if="${isAdmin}" th:href="@{/admin/exchanges}" class="btn btn-back" style="display:inline-block;margin-bottom:15px;">Quay lại</a>
+        <a th:unless="${isAdmin}" th:href="@{/exchanges}" class="btn btn-back" style="display:inline-block;margin-bottom:15px;">Quay lại</a>
+
+        <div th:if="${param.success}" class="alert alert-success" style="margin-bottom:15px;">
+            <span th:switch="${param.success[0]}">
+                <span th:case="'accepted'">Admin đã chấp nhận giao dịch.</span>
+                <span th:case="'rejected'">Giao dịch đã bị từ chối.</span>
+                <span th:case="'completed'">Giao dịch đã hoàn tất.</span>
+                <span th:case="*">Thành công.</span>
+            </span>
+        </div>
+        <div th:if="${param.error}" class="alert alert-danger" style="margin-bottom:15px;">
+            <span th:switch="${param.error[0]}">
+                <span th:case="'admin_only'">Chỉ admin mới được thao tác này.</span>
+                <span th:case="'waiting_admin_workflow'">Admin chưa hoàn tất các bước giao nhận.</span>
+                <span th:case="'not_allowed'">Bạn không có quyền thao tác trên giao dịch này.</span>
+                <span th:case="*">Đã xảy ra lỗi.</span>
+            </span>
+        </div>
+
         <div class="detail-container">
-            <!-- Bên trái: Thông tin sản phẩm trao đổi -->
             <div class="detail-card">
                 <div class="detail-header">
                     <h2>Trao đổi #<span th:text="${exchange.id}"></span></h2>
-                    <span class="exchange-status status-${exchange.status}" th:text="${exchange.status}"></span>
+                    <span class="exchange-status" th:classappend="' status-' + ${exchange.status.name()}" th:text="${exchange.statusLabel}"></span>
                 </div>
-                
+
+                <div class="workflow-box">
+                    <div class="workflow-top">
+                        <h3>Tiến độ giao dịch</h3>
+                        <strong th:text="${exchange.workflowStageLabel}">Trạng thái hiện tại</strong>
+                    </div>
+                    <div class="workflow-bar">
+                        <div class="workflow-fill" th:style="${'width:' + exchange.progressPercent + '%'}"></div>
+                    </div>
+                    <div class="workflow-steps">
+                        <div class="workflow-step" th:classappend="${exchange.workflowStageIndex > 1 ? ' done' : (exchange.workflowStageIndex == 1 ? ' active' : '')}">
+                            <div class="dot">1</div>
+                            <div>Admin duyệt</div>
+                        </div>
+                        <div class="workflow-step" th:classappend="${exchange.workflowStageIndex > 2 ? ' done' : (exchange.workflowStageIndex == 2 ? ' active' : '')}">
+                            <div class="dot">2</div>
+                            <div>Khớp giá</div>
+                        </div>
+                        <div class="workflow-step" th:classappend="${exchange.workflowStageIndex > 3 ? ' done' : (exchange.workflowStageIndex == 3 ? ' active' : '')}">
+                            <div class="dot">3</div>
+                            <div>Gửi cho admin</div>
+                        </div>
+                        <div class="workflow-step" th:classappend="${exchange.workflowStageIndex > 4 ? ' done' : (exchange.workflowStageIndex == 4 ? ' active' : '')}">
+                            <div class="dot">4</div>
+                            <div>Admin gửi hàng</div>
+                        </div>
+                        <div class="workflow-step" th:classappend="${exchange.workflowStageIndex == 5 ? ' active done' : ''}">
+                            <div class="dot">5</div>
+                            <div>Hoàn thành</div>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="exchange-products-detail">
                     <div class="product-detail">
                         <img th:src="${exchange.offeredProduct.imageUrl != null ? exchange.offeredProduct.imageUrl : '/images/no-image.png'}" alt="Product">
                         <h4 th:text="${exchange.offeredProduct.title}"></h4>
-                        <p>Giá: <span th:text="${#numbers.formatCurrency(exchange.offeredProduct.price)}"></span></p>
+                        <p>Giá admin duyệt:
+                            <strong th:text="${#numbers.formatDecimal(exchange.offeredProduct.effectivePrice, 0, 'COMMA', 0, 'POINT') + ' VND'}"></strong>
+                        </p>
                         <p>Người đề xuất: <strong th:text="${exchange.requester.username}"></strong></p>
                     </div>
                     <div class="arrow-center">⇄</div>
                     <div class="product-detail">
                         <img th:src="${exchange.requestedProduct.imageUrl != null ? exchange.requestedProduct.imageUrl : '/images/no-image.png'}" alt="Product">
                         <h4 th:text="${exchange.requestedProduct.title}"></h4>
-                        <p>Giá: <span th:text="${#numbers.formatCurrency(exchange.requestedProduct.price)}"></span></p>
+                        <p>Giá admin duyệt:
+                            <strong th:text="${#numbers.formatDecimal(exchange.requestedProduct.effectivePrice, 0, 'COMMA', 0, 'POINT') + ' VND'}"></strong>
+                        </p>
                         <p>Chủ sản phẩm: <strong th:text="${exchange.owner.username}"></strong></p>
                     </div>
                 </div>
-                
+
+                <div th:if="${exchange.cashAdjustment != null and exchange.cashAdjustment != 0}" class="note-box note-warn">
+                    Giao dịch này đang có chênh lệch giá. Hệ thống đang gợi ý bù thêm
+                    <strong th:text="${#numbers.formatDecimal(exchange.cashAdjustment, 0, 'COMMA', 0, 'POINT') + ' VND'}"></strong>
+                    để hai bên tiếp tục thương lượng trước khi admin chốt.
+                </div>
+
+                <div th:if="${exchange.status.name() == 'ACCEPTED'}" class="note-box note-success">
+                    Admin đã xác nhận giao dịch. Hai bên cần thực hiện đúng quy trình giao hàng theo từng bước ở trên.
+                </div>
+
+                <div th:if="${exchange.status.name() == 'NEGOTIATING' || exchange.status.name() == 'PENDING'}" class="note-box note-info">
+                    Giai đoạn hiện tại: hai bên có thể nhắn tin để thống nhất tình trạng đồ và cách giao nhận. Admin sẽ quyết định tiếp tục khi giá trị hai vật phẩm hợp lý.
+                </div>
+
                 <div class="detail-info">
                     <p><strong>Ngày tạo:</strong> <span th:text="${#temporals.format(exchange.createdAt, 'dd/MM/yyyy HH:mm')}"></span></p>
                     <p><strong>Cập nhật:</strong> <span th:text="${#temporals.format(exchange.updatedAt, 'dd/MM/yyyy HH:mm')}"></span></p>
-                    <div class="detail-message" th:if="${exchange.message}">
-                        <p><strong>Tin nhắn:</strong></p>
+                    <div class="detail-message" th:if="${exchange.message != null and !exchange.message.isEmpty()}">
+                        <p><strong>Tin nhắn mở đầu:</strong></p>
                         <p th:text="${exchange.message}"></p>
                     </div>
                 </div>
-                
+
                 <div class="action-buttons" th:if="${exchange.status.name() == 'PENDING' || exchange.status.name() == 'NEGOTIATING'}">
-                    <!-- Chủ sản phẩm chỉ có thể từ chối, duyệt chính thức do admin -->
                     <form th:if="${isOwner}" th:action="@{/exchange/{id}/reject(id=${exchange.id})}" method="post">
                         <button type="submit" class="btn btn-reject">Từ chối</button>
                     </form>
-                    <!-- Người gửi yêu cầu có thể hủy -->
-                    <form th:unless="${isOwner}" th:action="@{/exchange/{id}/cancel(id=${exchange.id})}" method="post">
-                        <button type="submit" class="btn btn-cancel" onclick="return confirm('Bạn có chắc muốn hủy yêu cầu trao đổi này?');">Hủy yêu cầu</button>
+                    <form th:if="${isRequester}" th:action="@{/exchange/{id}/cancel(id=${exchange.id})}" method="post">
+                        <button type="submit" class="btn btn-cancel" onclick="return confirm('Bạn có chắc muốn hủy yêu cầu này?');">Hủy yêu cầu</button>
                     </form>
                 </div>
-                
-                <div th:if="${exchange.status.name() == 'ACCEPTED'}" style="margin-top: 15px;">
-                    <p style="color: #27ae60; font-weight: 500; font-size: 13px;">✓ Đã được admin duyệt giá và đang xử lý theo quy trình giao hàng.</p>
+
+                <div class="action-buttons" th:if="${isAdmin}">
+                    <form th:if="${!exchange.terminal}" th:action="@{/admin/exchanges/{id}/evaluate-price(id=${exchange.id})}" method="post">
+                        <input type="hidden" name="tolerancePercent" value="10">
+                        <button type="submit" class="btn btn-admin">Đánh giá giá 10%</button>
+                    </form>
+                    <form th:if="${exchange.canAdvanceWorkflow()}" th:action="@{/admin/exchanges/{id}/advance-step(id=${exchange.id})}" method="post">
+                        <button type="submit" class="btn btn-complete"
+                                th:text="${exchange.deliveryConfirmationLevel == 1 ? 'Mở bước gửi hàng cho admin' :
+                                         (exchange.deliveryConfirmationLevel == 2 ? 'Xác nhận admin gửi hàng' : 'Hoàn tất giao dịch')}">Cập nhật tiến độ</button>
+                    </form>
+                    <form th:if="${!exchange.terminal}" th:action="@{/exchange/{id}/reject(id=${exchange.id})}" method="post">
+                        <button type="submit" class="btn btn-reject">Từ chối giao dịch</button>
+                    </form>
                 </div>
             </div>
-            
-            <!-- Bên phải: Tin nhắn -->
+
             <div class="chat-container">
                 <div class="chat-header">
-                    <h3>Tin nhắn thương lượng</h3>
+                    <h3>Trao đổi trong giao dịch</h3>
                 </div>
                 <div class="chat-messages" id="chatMessages">
                     <div th:each="msg : ${messages}" th:class="${msg.sender.id == currentUser.id ? 'message sent' : 'message received'}">
@@ -128,14 +213,15 @@
                             <span th:text="${msg.content}"></span>
                         </div>
                         <div class="message-time">
-                            <span th:text="${msg.sender.username}"></span> - <span th:text="${#temporals.format(msg.createdAt, 'dd/MM HH:mm')}"></span>
+                            <span th:text="${msg.sender.username}"></span> -
+                            <span th:text="${#temporals.format(msg.createdAt, 'dd/MM HH:mm')}"></span>
                         </div>
                     </div>
-                    <div th:if="${#lists.isEmpty(messages)}" style="text-align: center; color: #999; padding: 20px;">
-                        Chưa có tin nhắn. Hãy bắt đầu cuộc trò chuyện!
+                    <div th:if="${#lists.isEmpty(messages)}" style="text-align:center;color:#999;padding:20px;">
+                        Chưa có tin nhắn. Hãy bắt đầu cuộc trò chuyện.
                     </div>
                 </div>
-                <form th:action="@{/exchange/{id}/message(id=${exchange.id})}" method="post" class="chat-input">
+                <form th:action="@{/exchange/{id}/message(id=${exchange.id})}" method="post" class="chat-input" th:if="${!exchange.terminal}">
                     <input type="text" name="content" placeholder="Nhập tin nhắn..." required>
                     <button type="submit">Gửi</button>
                 </form>

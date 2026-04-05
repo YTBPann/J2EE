@@ -49,13 +49,13 @@ public class AuthController {
         if (userService.existsByUsername(username)) {
             return ResponseEntity.badRequest().body("User already exists");
         }
-        User user = User.builder()
-                .username(username)
-                .password(password)
-                .email(email)
-                .fullName("Admin")
-                .active(true)
-                .build();
+        User user = new User();
+        user.setUsername(username);
+        user.setPassword(password);
+        user.setEmail(email);
+        user.setFullName("Admin");
+        user.setActive(true);
+        user.setRole("ADMIN");
         userService.createUser(user);
         return ResponseEntity.ok("Admin created successfully!");
     }

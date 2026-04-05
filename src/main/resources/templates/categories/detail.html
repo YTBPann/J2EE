@@ -9,51 +9,47 @@
 </head>
 <body>
     <div th:replace="~{fragments/navbar :: navbar}"></div>
-    
+
     <main class="container">
         <h2 class="section-title" th:text="${category.name}">Category Name</h2>
-        
+
         <div class="products-grid">
-            <a th:each="product : ${products}" 
-               th:href="@{/product/{id}(id=${product.id})}" 
-               class="product-card">
-                <img th:src="${product.imageUrl != null ? product.imageUrl : '/images/no-image.png'}" 
-                     alt="Product Image" 
-                     class="product-image">
+            <a th:each="product : ${products}" th:href="@{/product/{id}(id=${product.id})}" class="product-card">
+                <img th:src="${product.imageUrl != null ? product.imageUrl : '/images/no-image.png'}" alt="Product Image" class="product-image">
                 <div class="product-info">
                     <h3 class="product-title" th:text="${product.title}">Product Title</h3>
-                    <div class="product-price" th:text="${#numbers.formatDecimal(product.price, 0, 'COMMA', 0, 'POINT') + ' VNĐ'}">Price</div>
+                    <div class="product-price" th:text="${#numbers.formatDecimal(product.effectivePrice, 0, 'COMMA', 0, 'POINT') + ' VND'}">Price</div>
                     <div class="product-meta">
                         <span th:text="${product.category.name}">Category</span>
-                        <span class="product-condition" 
-                              th:classappend="${product.condition == 'NEW'} ? 'condition-new' : (${product.condition == 'LIKE_NEW'} ? 'condition-like-new' : 'condition-used')"
-                              th:text="${product.condition == 'NEW'} ? 'Mới' : (${product.condition == 'LIKE_NEW'} ? 'Như mới' : 'Đã sử dụng')">Condition</span>
+                        <span class="product-condition"
+                              th:classappend="${product.condition == 'NEW' ? 'condition-new' : (product.condition == 'LIKE_NEW' ? 'condition-like-new' : 'condition-used')}"
+                              th:text="${product.condition == 'NEW' ? 'Mới' : (product.condition == 'LIKE_NEW' ? 'Như mới' : 'Đã sử dụng')}">Condition</span>
                     </div>
                 </div>
             </a>
         </div>
-        
-        <div th:if="${#lists.isEmpty(products)}" style="text-align: center; padding: 3rem;">
-            <p style="font-size: 1.2rem; color: #7f8c8d;">Chưa có sản phẩm nào trong danh mục này.</p>
-            <a th:href="@{/categories}" class="btn btn-primary" style="margin-top: 1rem;">Xem danh mục khác</a>
+
+        <div th:if="${#lists.isEmpty(products)}" style="text-align:center;padding:3rem;">
+            <p style="font-size:1.2rem;color:#7f8c8d;">Chưa có sản phẩm nào trong danh mục này.</p>
+            <a th:href="@{/categories}" class="btn btn-primary" style="margin-top:1rem;">Xem danh mục khác</a>
         </div>
-        
+
         <div th:if="${totalPages > 1}" class="pagination">
             <a th:if="${currentPage > 0}" th:href="@{/category/{id}(id=${category.id}, page=${currentPage - 1})}">Trước</a>
             <span th:each="i : ${#numbers.sequence(0, totalPages - 1)}">
-                <a th:href="@{/category/{id}(id=${category.id}, page=${i})}" 
+                <a th:href="@{/category/{id}(id=${category.id}, page=${i})}"
                    th:text="${i + 1}"
-                   th:classappend="${i == currentPage} ? 'active'">Page</a>
+                   th:classappend="${i == currentPage ? 'active' : ''}">Page</a>
             </span>
             <a th:if="${currentPage < totalPages - 1}" th:href="@{/category/{id}(id=${category.id}, page=${currentPage + 1})}">Sau</a>
         </div>
     </main>
-    
+
     <footer>
         <div class="footer-content">
             <div class="footer-section">
                 <h3>Về EcoSwap</h3>
-                <p>Nền tảng mua bán và trao đổi đồ cũ uy tín, an toàn tại Việt Nam.</p>
+                <p>Sản phẩm trong danh mục chỉ hiển thị khi đã được admin duyệt.</p>
             </div>
         </div>
         <div class="footer-bottom">

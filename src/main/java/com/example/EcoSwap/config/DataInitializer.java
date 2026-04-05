@@ -10,57 +10,50 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class DataInitializer implements CommandLineRunner {
-    
+
     private final UserRepository userRepository;
     private final CategoryRepository categoryRepository;
     private final PasswordEncoder passwordEncoder;
-    
+
     public DataInitializer(UserRepository userRepository, CategoryRepository categoryRepository,
-                          PasswordEncoder passwordEncoder) {
+                           PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.categoryRepository = categoryRepository;
         this.passwordEncoder = passwordEncoder;
     }
-    
+
     @Override
     public void run(String... args) {
-        // Tạo hoặc cập nhật admin
         User admin = userRepository.findByUsername("admin").orElse(null);
         if (admin == null) {
-            admin = User.builder()
-                    .username("admin")
-                    .email("admin@ecoswap.com")
-                    .password(passwordEncoder.encode("admin123"))
-                    .fullName("Quản trị viên")
-                    .phone("0123456789")
-                    .address("Hà Nội, Việt Nam")
-                    .active(true)
-                    .role("ADMIN")
-                    .build();
+            admin = new User();
+            admin.setUsername("admin");
+            admin.setEmail("admin@ecoswap.com");
+            admin.setPassword(passwordEncoder.encode("admin123"));
+            admin.setFullName("Quản trị viên");
+            admin.setPhone("0123456789");
+            admin.setAddress("Hà Nội, Việt Nam");
+            admin.setActive(true);
+            admin.setRole("ADMIN");
             userRepository.save(admin);
-        } else {
-            // Đảm bảo admin luôn có role ADMIN (cập nhật nếu thiếu)
-            if (!"ADMIN".equals(admin.getRole())) {
-                admin.setRole("ADMIN");
-                userRepository.save(admin);
-            }
+        } else if (!"ADMIN".equals(admin.getRole())) {
+            admin.setRole("ADMIN");
+            userRepository.save(admin);
         }
-        
-        // Tạo user1 nếu chưa tồn tại
+
         if (userRepository.findByUsername("nguoidung1").isEmpty()) {
-            User user1 = User.builder()
-                .username("nguoidung1")
-                .email("user1@email.com")
-                .password(passwordEncoder.encode("123456"))
-                .fullName("Người Dùng Một")
-                .phone("0987654321")
-                .address("TP. Hồ Chí Minh, Việt Nam")
-                .active(true)
-                .role("USER")
-                .build();
+            User user1 = new User();
+            user1.setUsername("nguoidung1");
+            user1.setEmail("user1@email.com");
+            user1.setPassword(passwordEncoder.encode("123456"));
+            user1.setFullName("Người Dùng Một");
+            user1.setPhone("0987654321");
+            user1.setAddress("TP. Hồ Chí Minh, Việt Nam");
+            user1.setActive(true);
+            user1.setRole("USER");
             userRepository.save(user1);
         }
-        
+
         if (categoryRepository.count() == 0) {
             String[] categories = {
                 "Điện tử - Công nghệ",
@@ -72,12 +65,11 @@ public class DataInitializer implements CommandLineRunner {
                 "Nội thất",
                 "Ô tô - Xe máy"
             };
-            
+
             for (String name : categories) {
-                Category category = Category.builder()
-                    .name(name)
-                    .description("Danh mục " + name.toLowerCase())
-                    .build();
+                Category category = new Category();
+                category.setName(name);
+                category.setDescription("Danh mục " + name.toLowerCase());
                 categoryRepository.save(category);
             }
         }

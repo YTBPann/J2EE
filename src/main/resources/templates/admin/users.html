@@ -40,13 +40,13 @@
     </header>
 
     <div th:if="${param.success}" class="alert alert-success" th:with="msg=${param.success[0]}">
-        <span th:text="${#strings.equals(msg,'status_updated')} ? 'Cập nhật trạng thái thành công!' :
-                       (#strings.equals(msg,'deleted')} ? 'Xóa người dùng thành công!' : ${msg})"></span>
+        <span th:text="${#strings.equals(msg,'status_updated') ? 'Cập nhật trạng thái thành công!' :
+                       (#strings.equals(msg,'deleted') ? 'Xóa người dùng thành công!' : msg)}"></span>
     </div>
     <div th:if="${param.error}" class="alert alert-danger" th:with="msg=${param.error[0]}">
-        <span th:text="${#strings.equals(msg,'not_found')} ? 'Không tìm thấy!' :
-                       (#strings.equals(msg,'cannot_delete_self')} ? 'Không thể xóa tài khoản của chính mình!' :
-                       (#strings.equals(msg,'cannot_disable_self')} ? 'Không thể vô hiệu hóa tài khoản của chính mình!' : ${msg}))"></span>
+        <span th:text="${#strings.equals(msg,'not_found') ? 'Không tìm thấy!' :
+                       (#strings.equals(msg,'cannot_delete_self') ? 'Không thể xóa tài khoản của chính mình!' :
+                       (#strings.equals(msg,'cannot_disable_self') ? 'Không thể vô hiệu hóa tài khoản của chính mình!' : msg))}"></span>
     </div>
 
     <main class="admin-content">
@@ -86,21 +86,21 @@
                                 </div>
                             </td>
                             <td th:text="${user.email}">email@example.com</td>
-                            <td th:text="${user.phone != null} ? ${user.phone} : '-'">-</td>
+                            <td th:text="${user.phone != null ? user.phone : '-'}">-</td>
                             <td>
                                 <span class="badge" th:classappend="${'ADMIN'.equals(user.role) ? 'badge-admin' : 'badge-user'}"
                                       th:text="${'ADMIN'.equals(user.role) ? 'Admin' : 'User'}">User</span>
                             </td>
                             <td>
-                                <span class="badge" th:classappend="${user.active} ? 'badge-active' : 'badge-inactive'"
-                                      th:text="${user.active} ? 'Hoạt động' : 'Bị khóa'">Hoạt động</span>
+                                <span class="badge" th:classappend="${user.active ? 'badge-active' : 'badge-inactive'}"
+                                      th:text="${user.active ? 'Hoạt động' : 'Bị khóa'}">Hoạt động</span>
                             </td>
                             <td th:text="${#temporals.format(user.createdAt, 'dd/MM/yyyy')}">01/01/2026</td>
                             <td>
                                 <a th:href="@{/admin/users/{id}(id=${user.id})}" class="btn-sm btn-view">👁 Xem</a>
                                 <form th:action="@{/admin/users/{id}/toggle-status(id=${user.id})}" method="post" style="display: inline;">
                                     <button type="submit" class="btn-sm btn-warning"
-                                            th:text="${user.active} ? '🔒 Khóa' : '🔓 Mở khóa'">Khóa</button>
+                                            th:text="${user.active ? '🔒 Khóa' : '🔓 Mở khóa'}">Khóa</button>
                                 </form>
                                 <form th:action="@{/admin/users/{id}/delete(id=${user.id})}" method="post" style="display: inline;"
                                       onsubmit="return confirm('Bạn chắc chắn muốn xóa người dùng này?')">
@@ -118,7 +118,7 @@
             <div class="pagination" th:if="${totalPages > 1}">
                 <th:block th:each="i : ${#numbers.sequence(0, totalPages - 1)}">
                     <a th:href="@{/admin/users(page=${i}, search=${search})}"
-                       th:classappend="${i == currentPage} ? 'current'"
+                       th:classappend="${i == currentPage ? 'current' : ''}"
                        th:text="${i + 1}">1</a>
                 </th:block>
             </div>

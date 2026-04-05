@@ -71,10 +71,10 @@
                         <tr th:each="cat : ${categories}">
                             <td th:text="${cat.id}">1</td>
                             <td style="font-weight: 600;" th:text="${cat.name}">Category Name</td>
-                            <td th:text="${cat.description != null} ? ${cat.description} : '-'">Mô tả</td>
+                            <td th:text="${cat.description != null ? cat.description : '-'}">Mô tả</td>
                             <td>
                                 <span class="badge badge-info"
-                                      th:text="${cat.products != null} ? ${#lists.size(cat.products)} : 0">0</span>
+                                      th:text="${cat.products != null ? #lists.size(cat.products) : 0}">0</span>
                             </td>
                             <td>
                                 <a th:href="@{/admin/categories/{id}/edit(id=${cat.id})}" class="btn-sm btn-edit">✏️ Sửa</a>

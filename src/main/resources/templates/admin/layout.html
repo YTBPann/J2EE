@@ -22,23 +22,23 @@
 
     <nav class="admin-nav">
         <a th:href="@{/admin/dashboard}" class="admin-nav-item"
-           th:classappend="${#strings.contains(#httpServletRequest.requestURI, '/admin/dashboard')} ? 'active'">
+           th:classappend="${#strings.contains(#httpServletRequest.requestURI, '/admin/dashboard') ? 'active' : ''}">
             <span class="nav-icon">📊</span> <span>Tổng quan</span>
         </a>
         <a th:href="@{/admin/users}" class="admin-nav-item"
-           th:classappend="${#strings.contains(#httpServletRequest.requestURI, '/admin/users')} ? 'active'">
+           th:classappend="${#strings.contains(#httpServletRequest.requestURI, '/admin/users') ? 'active' : ''}">
             <span class="nav-icon">👥</span> <span>Người dùng</span>
         </a>
         <a th:href="@{/admin/categories}" class="admin-nav-item"
-           th:classappend="${#strings.contains(#httpServletRequest.requestURI, '/admin/categories')} ? 'active'">
+           th:classappend="${#strings.contains(#httpServletRequest.requestURI, '/admin/categories') ? 'active' : ''}">
             <span class="nav-icon">📁</span> <span>Danh mục</span>
         </a>
         <a th:href="@{/admin/products}" class="admin-nav-item"
-           th:classappend="${#strings.contains(#httpServletRequest.requestURI, '/admin/products')} ? 'active'">
+           th:classappend="${#strings.contains(#httpServletRequest.requestURI, '/admin/products') ? 'active' : ''}">
             <span class="nav-icon">📦</span> <span>Sản phẩm</span>
         </a>
         <a th:href="@{/admin/exchanges}" class="admin-nav-item"
-           th:classappend="${#strings.contains(#httpServletRequest.requestURI, '/admin/exchanges')} ? 'active'">
+           th:classappend="${#strings.contains(#httpServletRequest.requestURI, '/admin/exchanges') ? 'active' : ''}">
             <span class="nav-icon">🔄</span> <span>Trao đổi</span>
         </a>
     </nav>

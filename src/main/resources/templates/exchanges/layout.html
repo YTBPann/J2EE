@@ -38,8 +38,8 @@
         <h1>Quản lý trao đổi</h1>
         
         <div class="exchange-tabs">
-            <a th:href="@{/exchanges(sent=true)}" th:classappend="${param.sent != null} ? 'active' : ''">Yêu cầu đã gửi</a>
-            <a th:href="@{/exchanges(received=true)}" th:classappend="${param.received != null} ? 'active' : ''">Yêu cầu nhận được</a>
+            <a th:href="@{/exchanges(sent=true)}" th:classappend="${param.sent != null ? 'active' : ''}">Yêu cầu đã gửi</a>
+            <a th:href="@{/exchanges(received=true)}" th:classappend="${param.received != null ? 'active' : ''}">Yêu cầu nhận được</a>
         </div>
         
         <div th:if="${param.success}">
